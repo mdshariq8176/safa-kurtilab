@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     console.log('Cleaned old database records.');
 
     // 2. Create users (Admin & standard User)
-    const admin = await prisma.user.create({
+    await prisma.user.create({
       data: {
         name: 'Admin Director',
         email: 'admin@safakurtilab.com',
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       },
     });
 
-    const customer = await prisma.user.create({
+    await prisma.user.create({
       data: {
         name: 'B2B Client India',
         email: 'b2b@retailer.com',
@@ -232,7 +232,8 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ success: true, message: 'Database successfully seeded with 10 Kurti types!' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message || 'Seeding failed.' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Seeding failed.';
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
