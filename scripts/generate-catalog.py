@@ -13,11 +13,11 @@ unsplash_images = [
     "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1608748010899-18f300247112?w=800&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1610030470298-40b355e71789?w=800&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1611601679655-7c8bc197f0c6?w=800&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1595959183075-c1d09e37b18c?w=800&auto=format&fit=crop&q=80"
+    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&auto=format&fit=crop&q=80"
 ]
 
 colors = [
