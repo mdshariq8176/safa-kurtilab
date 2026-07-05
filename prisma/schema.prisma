@@ -1,0 +1,69 @@
+// Safa Kurtilab Database Schema
+// Optimized for local development with SQLite and easily switchable to PostgreSQL for production.
+
+datasource db {
+  provider = "postgresql" // Switched to postgresql for production cloud deployment
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  role          String    @default("USER") // Using String for SQLite/Postgres enum cross-compatibility
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+}
+
+model Product {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String
+  basePrice   Float
+  discount    Float      @default(0) // Percentage
+  images      String     // Stored as a comma-separated list or JSON string for cross-database compatibility (SQLite/Postgres)
+  category    String     // Anarkali, A-Line, Straight Cut, etc.
+  variants    Variant[]  // Stock mapping to sizes and colors
+  createdAt   DateTime   @default(now())
+}
+
+model Variant {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String   // XS, S, M, L, XL, XXL
+  color     String   // Emerald, Mustard Gold, Crimson, Indigo, Charcoal
+  stock     Int      @default(0) // Real-time strict inventory control
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  items           String      // JSON stringified snapshot array of ordered items, chosen sizes, and prices
+  totalAmount     Float
+  gstAmount       Float       // Automatic 5% GST computation
+  gstin           String?     // Optional customer B2B GSTIN input
+  companyName     String?     // Optional customer B2B Company Name
+  paymentStatus   String      // PENDING, PAID, FAILED
+  deliveryStatus  String      // PROCESSING, SHIPPED, DELIVERED
+  trackingId      String?     // 3PL Tracking ID (e.g. Shiprocket/Delhivery reference)
+  invoiceData     String?     // JSON snapshot containing HSN, CGST, SGST, IGST tax breakdown
+  phone           String?     // Shipping customer contact phone number
+  address         String?     // Shipping street address details
+  city            String?     // Shipping destination city
+  state           String?     // Shipping destination state (determines CGST/SGST vs IGST split)
+  pincode         String?     // Shipping destination pin code
+  createdAt       DateTime    @default(now())
+}
