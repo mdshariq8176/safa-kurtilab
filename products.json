@@ -1,11 +1,452 @@
 [
   {
-    "name": "Emerald Royale Georgette Kurta",
-    "description": "Premium ethnic georgette wear with detailed gold embroidery work perfect for luxury celebrations.",
-    "basePrice": 1499,
-    "imageUrl": "/images/emerald-georgette-kurta.png",
+    "name": "Maison Royal Crimson Anarkali Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Royal Crimson ensemble. Tailored specifically for the Anarkali style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 2899,
+    "imageUrl": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80",
     "category": "Anarkali",
-    "stockPerSize": 50,
-    "color": "Emerald"
+    "stockPerSize": 20,
+    "color": "Royal Crimson"
+  },
+  {
+    "name": "Maison Emerald Green Anarkali Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Emerald Green ensemble. Tailored specifically for the Anarkali style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3299,
+    "imageUrl": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80",
+    "category": "Anarkali",
+    "stockPerSize": 25,
+    "color": "Emerald Green"
+  },
+  {
+    "name": "Maison Mustard Gold Anarkali Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Mustard Gold ensemble. Tailored specifically for the Anarkali style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3699,
+    "imageUrl": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=80",
+    "category": "Anarkali",
+    "stockPerSize": 30,
+    "color": "Mustard Gold"
+  },
+  {
+    "name": "Maison Indigo Blue Anarkali Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Indigo Blue ensemble. Tailored specifically for the Anarkali style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4099,
+    "imageUrl": "https://images.unsplash.com/photo-1608748010899-18f300247112?w=800&auto=format&fit=crop&q=80",
+    "category": "Anarkali",
+    "stockPerSize": 35,
+    "color": "Indigo Blue"
+  },
+  {
+    "name": "Maison Pastel Peach Anarkali Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Pastel Peach ensemble. Tailored specifically for the Anarkali style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4499,
+    "imageUrl": "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&auto=format&fit=crop&q=80",
+    "category": "Anarkali",
+    "stockPerSize": 40,
+    "color": "Pastel Peach"
+  },
+  {
+    "name": "Maison Ivory White Straight Fit Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Ivory White ensemble. Tailored specifically for the Straight Fit style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3049,
+    "imageUrl": "https://images.unsplash.com/photo-1610030470298-40b355e71789?w=800&auto=format&fit=crop&q=80",
+    "category": "Straight Fit",
+    "stockPerSize": 20,
+    "color": "Ivory White"
+  },
+  {
+    "name": "Maison Mint Green Straight Fit Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Mint Green ensemble. Tailored specifically for the Straight Fit style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3449,
+    "imageUrl": "https://images.unsplash.com/photo-1611601679655-7c8bc197f0c6?w=800&auto=format&fit=crop&q=80",
+    "category": "Straight Fit",
+    "stockPerSize": 25,
+    "color": "Mint Green"
+  },
+  {
+    "name": "Maison Lavender Pink Straight Fit Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Lavender Pink ensemble. Tailored specifically for the Straight Fit style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3849,
+    "imageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop&q=80",
+    "category": "Straight Fit",
+    "stockPerSize": 30,
+    "color": "Lavender Pink"
+  },
+  {
+    "name": "Maison Midnight Black Straight Fit Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Midnight Black ensemble. Tailored specifically for the Straight Fit style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4249,
+    "imageUrl": "https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=800&auto=format&fit=crop&q=80",
+    "category": "Straight Fit",
+    "stockPerSize": 35,
+    "color": "Midnight Black"
+  },
+  {
+    "name": "Maison Ruby Red Straight Fit Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Ruby Red ensemble. Tailored specifically for the Straight Fit style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4649,
+    "imageUrl": "https://images.unsplash.com/photo-1595959183075-c1d09e37b18c?w=800&auto=format&fit=crop&q=80",
+    "category": "Straight Fit",
+    "stockPerSize": 40,
+    "color": "Ruby Red"
+  },
+  {
+    "name": "Maison Royal Crimson A-Line Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Royal Crimson ensemble. Tailored specifically for the A-Line style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3199,
+    "imageUrl": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80",
+    "category": "A-Line",
+    "stockPerSize": 20,
+    "color": "Royal Crimson"
+  },
+  {
+    "name": "Maison Emerald Green A-Line Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Emerald Green ensemble. Tailored specifically for the A-Line style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3599,
+    "imageUrl": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80",
+    "category": "A-Line",
+    "stockPerSize": 25,
+    "color": "Emerald Green"
+  },
+  {
+    "name": "Maison Mustard Gold A-Line Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Mustard Gold ensemble. Tailored specifically for the A-Line style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3999,
+    "imageUrl": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=80",
+    "category": "A-Line",
+    "stockPerSize": 30,
+    "color": "Mustard Gold"
+  },
+  {
+    "name": "Maison Indigo Blue A-Line Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Indigo Blue ensemble. Tailored specifically for the A-Line style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4399,
+    "imageUrl": "https://images.unsplash.com/photo-1608748010899-18f300247112?w=800&auto=format&fit=crop&q=80",
+    "category": "A-Line",
+    "stockPerSize": 35,
+    "color": "Indigo Blue"
+  },
+  {
+    "name": "Maison Pastel Peach A-Line Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Pastel Peach ensemble. Tailored specifically for the A-Line style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4799,
+    "imageUrl": "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&auto=format&fit=crop&q=80",
+    "category": "A-Line",
+    "stockPerSize": 40,
+    "color": "Pastel Peach"
+  },
+  {
+    "name": "Maison Ivory White Angrakha Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Ivory White ensemble. Tailored specifically for the Angrakha style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3349,
+    "imageUrl": "https://images.unsplash.com/photo-1610030470298-40b355e71789?w=800&auto=format&fit=crop&q=80",
+    "category": "Angrakha",
+    "stockPerSize": 20,
+    "color": "Ivory White"
+  },
+  {
+    "name": "Maison Mint Green Angrakha Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Mint Green ensemble. Tailored specifically for the Angrakha style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3749,
+    "imageUrl": "https://images.unsplash.com/photo-1611601679655-7c8bc197f0c6?w=800&auto=format&fit=crop&q=80",
+    "category": "Angrakha",
+    "stockPerSize": 25,
+    "color": "Mint Green"
+  },
+  {
+    "name": "Maison Lavender Pink Angrakha Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Lavender Pink ensemble. Tailored specifically for the Angrakha style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4149,
+    "imageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop&q=80",
+    "category": "Angrakha",
+    "stockPerSize": 30,
+    "color": "Lavender Pink"
+  },
+  {
+    "name": "Maison Midnight Black Angrakha Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Midnight Black ensemble. Tailored specifically for the Angrakha style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4549,
+    "imageUrl": "https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=800&auto=format&fit=crop&q=80",
+    "category": "Angrakha",
+    "stockPerSize": 35,
+    "color": "Midnight Black"
+  },
+  {
+    "name": "Maison Ruby Red Angrakha Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Ruby Red ensemble. Tailored specifically for the Angrakha style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4949,
+    "imageUrl": "https://images.unsplash.com/photo-1595959183075-c1d09e37b18c?w=800&auto=format&fit=crop&q=80",
+    "category": "Angrakha",
+    "stockPerSize": 40,
+    "color": "Ruby Red"
+  },
+  {
+    "name": "Maison Royal Crimson Asymmetric Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Royal Crimson ensemble. Tailored specifically for the Asymmetric style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3499,
+    "imageUrl": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80",
+    "category": "Asymmetric",
+    "stockPerSize": 20,
+    "color": "Royal Crimson"
+  },
+  {
+    "name": "Maison Emerald Green Asymmetric Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Emerald Green ensemble. Tailored specifically for the Asymmetric style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3899,
+    "imageUrl": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80",
+    "category": "Asymmetric",
+    "stockPerSize": 25,
+    "color": "Emerald Green"
+  },
+  {
+    "name": "Maison Mustard Gold Asymmetric Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Mustard Gold ensemble. Tailored specifically for the Asymmetric style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4299,
+    "imageUrl": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=80",
+    "category": "Asymmetric",
+    "stockPerSize": 30,
+    "color": "Mustard Gold"
+  },
+  {
+    "name": "Maison Indigo Blue Asymmetric Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Indigo Blue ensemble. Tailored specifically for the Asymmetric style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4699,
+    "imageUrl": "https://images.unsplash.com/photo-1608748010899-18f300247112?w=800&auto=format&fit=crop&q=80",
+    "category": "Asymmetric",
+    "stockPerSize": 35,
+    "color": "Indigo Blue"
+  },
+  {
+    "name": "Maison Pastel Peach Asymmetric Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Pastel Peach ensemble. Tailored specifically for the Asymmetric style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5099,
+    "imageUrl": "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&auto=format&fit=crop&q=80",
+    "category": "Asymmetric",
+    "stockPerSize": 40,
+    "color": "Pastel Peach"
+  },
+  {
+    "name": "Maison Ivory White Jacket Style Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Ivory White ensemble. Tailored specifically for the Jacket Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3649,
+    "imageUrl": "https://images.unsplash.com/photo-1610030470298-40b355e71789?w=800&auto=format&fit=crop&q=80",
+    "category": "Jacket Style",
+    "stockPerSize": 20,
+    "color": "Ivory White"
+  },
+  {
+    "name": "Maison Mint Green Jacket Style Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Mint Green ensemble. Tailored specifically for the Jacket Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4049,
+    "imageUrl": "https://images.unsplash.com/photo-1611601679655-7c8bc197f0c6?w=800&auto=format&fit=crop&q=80",
+    "category": "Jacket Style",
+    "stockPerSize": 25,
+    "color": "Mint Green"
+  },
+  {
+    "name": "Maison Lavender Pink Jacket Style Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Lavender Pink ensemble. Tailored specifically for the Jacket Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4449,
+    "imageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop&q=80",
+    "category": "Jacket Style",
+    "stockPerSize": 30,
+    "color": "Lavender Pink"
+  },
+  {
+    "name": "Maison Midnight Black Jacket Style Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Midnight Black ensemble. Tailored specifically for the Jacket Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4849,
+    "imageUrl": "https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=800&auto=format&fit=crop&q=80",
+    "category": "Jacket Style",
+    "stockPerSize": 35,
+    "color": "Midnight Black"
+  },
+  {
+    "name": "Maison Ruby Red Jacket Style Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Ruby Red ensemble. Tailored specifically for the Jacket Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5249,
+    "imageUrl": "https://images.unsplash.com/photo-1595959183075-c1d09e37b18c?w=800&auto=format&fit=crop&q=80",
+    "category": "Jacket Style",
+    "stockPerSize": 40,
+    "color": "Ruby Red"
+  },
+  {
+    "name": "Maison Royal Crimson Flared & Phiran Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Royal Crimson ensemble. Tailored specifically for the Flared & Phiran style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3799,
+    "imageUrl": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80",
+    "category": "Flared & Phiran",
+    "stockPerSize": 20,
+    "color": "Royal Crimson"
+  },
+  {
+    "name": "Maison Emerald Green Flared & Phiran Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Emerald Green ensemble. Tailored specifically for the Flared & Phiran style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4199,
+    "imageUrl": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80",
+    "category": "Flared & Phiran",
+    "stockPerSize": 25,
+    "color": "Emerald Green"
+  },
+  {
+    "name": "Maison Mustard Gold Flared & Phiran Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Mustard Gold ensemble. Tailored specifically for the Flared & Phiran style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4599,
+    "imageUrl": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=80",
+    "category": "Flared & Phiran",
+    "stockPerSize": 30,
+    "color": "Mustard Gold"
+  },
+  {
+    "name": "Maison Indigo Blue Flared & Phiran Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Indigo Blue ensemble. Tailored specifically for the Flared & Phiran style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4999,
+    "imageUrl": "https://images.unsplash.com/photo-1608748010899-18f300247112?w=800&auto=format&fit=crop&q=80",
+    "category": "Flared & Phiran",
+    "stockPerSize": 35,
+    "color": "Indigo Blue"
+  },
+  {
+    "name": "Maison Pastel Peach Flared & Phiran Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Pastel Peach ensemble. Tailored specifically for the Flared & Phiran style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5399,
+    "imageUrl": "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&auto=format&fit=crop&q=80",
+    "category": "Flared & Phiran",
+    "stockPerSize": 40,
+    "color": "Pastel Peach"
+  },
+  {
+    "name": "Maison Ivory White Indo-Western Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Ivory White ensemble. Tailored specifically for the Indo-Western style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 3949,
+    "imageUrl": "https://images.unsplash.com/photo-1610030470298-40b355e71789?w=800&auto=format&fit=crop&q=80",
+    "category": "Indo-Western",
+    "stockPerSize": 20,
+    "color": "Ivory White"
+  },
+  {
+    "name": "Maison Mint Green Indo-Western Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Mint Green ensemble. Tailored specifically for the Indo-Western style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4349,
+    "imageUrl": "https://images.unsplash.com/photo-1611601679655-7c8bc197f0c6?w=800&auto=format&fit=crop&q=80",
+    "category": "Indo-Western",
+    "stockPerSize": 25,
+    "color": "Mint Green"
+  },
+  {
+    "name": "Maison Lavender Pink Indo-Western Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Lavender Pink ensemble. Tailored specifically for the Indo-Western style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4749,
+    "imageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop&q=80",
+    "category": "Indo-Western",
+    "stockPerSize": 30,
+    "color": "Lavender Pink"
+  },
+  {
+    "name": "Maison Midnight Black Indo-Western Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Midnight Black ensemble. Tailored specifically for the Indo-Western style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5149,
+    "imageUrl": "https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=800&auto=format&fit=crop&q=80",
+    "category": "Indo-Western",
+    "stockPerSize": 35,
+    "color": "Midnight Black"
+  },
+  {
+    "name": "Maison Ruby Red Indo-Western Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Ruby Red ensemble. Tailored specifically for the Indo-Western style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5549,
+    "imageUrl": "https://images.unsplash.com/photo-1595959183075-c1d09e37b18c?w=800&auto=format&fit=crop&q=80",
+    "category": "Indo-Western",
+    "stockPerSize": 40,
+    "color": "Ruby Red"
+  },
+  {
+    "name": "Maison Royal Crimson Kaftan Style Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Royal Crimson ensemble. Tailored specifically for the Kaftan Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4099,
+    "imageUrl": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80",
+    "category": "Kaftan Style",
+    "stockPerSize": 20,
+    "color": "Royal Crimson"
+  },
+  {
+    "name": "Maison Emerald Green Kaftan Style Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Emerald Green ensemble. Tailored specifically for the Kaftan Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4499,
+    "imageUrl": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80",
+    "category": "Kaftan Style",
+    "stockPerSize": 25,
+    "color": "Emerald Green"
+  },
+  {
+    "name": "Maison Mustard Gold Kaftan Style Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Mustard Gold ensemble. Tailored specifically for the Kaftan Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4899,
+    "imageUrl": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=80",
+    "category": "Kaftan Style",
+    "stockPerSize": 30,
+    "color": "Mustard Gold"
+  },
+  {
+    "name": "Maison Indigo Blue Kaftan Style Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Indigo Blue ensemble. Tailored specifically for the Kaftan Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5299,
+    "imageUrl": "https://images.unsplash.com/photo-1608748010899-18f300247112?w=800&auto=format&fit=crop&q=80",
+    "category": "Kaftan Style",
+    "stockPerSize": 35,
+    "color": "Indigo Blue"
+  },
+  {
+    "name": "Maison Pastel Peach Kaftan Style Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Pastel Peach ensemble. Tailored specifically for the Kaftan Style style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5699,
+    "imageUrl": "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&auto=format&fit=crop&q=80",
+    "category": "Kaftan Style",
+    "stockPerSize": 40,
+    "color": "Pastel Peach"
+  },
+  {
+    "name": "Maison Ivory White Boutique Special Ensemble v1",
+    "description": "Indulge in absolute luxury with this signature Ivory White ensemble. Tailored specifically for the Boutique Special style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4249,
+    "imageUrl": "https://images.unsplash.com/photo-1610030470298-40b355e71789?w=800&auto=format&fit=crop&q=80",
+    "category": "Boutique Special",
+    "stockPerSize": 20,
+    "color": "Ivory White"
+  },
+  {
+    "name": "Maison Mint Green Boutique Special Ensemble v2",
+    "description": "Indulge in absolute luxury with this signature Mint Green ensemble. Tailored specifically for the Boutique Special style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 4649,
+    "imageUrl": "https://images.unsplash.com/photo-1611601679655-7c8bc197f0c6?w=800&auto=format&fit=crop&q=80",
+    "category": "Boutique Special",
+    "stockPerSize": 25,
+    "color": "Mint Green"
+  },
+  {
+    "name": "Maison Lavender Pink Boutique Special Ensemble v3",
+    "description": "Indulge in absolute luxury with this signature Lavender Pink ensemble. Tailored specifically for the Boutique Special style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5049,
+    "imageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop&q=80",
+    "category": "Boutique Special",
+    "stockPerSize": 30,
+    "color": "Lavender Pink"
+  },
+  {
+    "name": "Maison Midnight Black Boutique Special Ensemble v4",
+    "description": "Indulge in absolute luxury with this signature Midnight Black ensemble. Tailored specifically for the Boutique Special style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5449,
+    "imageUrl": "https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=800&auto=format&fit=crop&q=80",
+    "category": "Boutique Special",
+    "stockPerSize": 35,
+    "color": "Midnight Black"
+  },
+  {
+    "name": "Maison Ruby Red Boutique Special Ensemble v5",
+    "description": "Indulge in absolute luxury with this signature Ruby Red ensemble. Tailored specifically for the Boutique Special style, this design is handcrafted from premium, breathable fabrics and adorned with bespoke zari and thread work. Perfect for festive luxury and celebratory grace.",
+    "basePrice": 5849,
+    "imageUrl": "https://images.unsplash.com/photo-1595959183075-c1d09e37b18c?w=800&auto=format&fit=crop&q=80",
+    "category": "Boutique Special",
+    "stockPerSize": 40,
+    "color": "Ruby Red"
   }
 ]
