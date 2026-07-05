@@ -62,10 +62,15 @@ Located in [src/app/api/webhooks/payment/route.ts](file:///d:/Website/src/app/ap
 * **Automatic Status Updates**: Sets the Order to `PAID`, schedules dispatch as `SHIPPED`, stores the 3PL tracking reference, and writes the complete invoice payload in the `invoiceData` field.
 
 ### 4. Client Cart Logic (`useCart`)
-Located in [src/hooks/useCart.ts](file:///d:/Website/src/hooks/useCart.ts), it bridges Zustand state with Next.js rendering:
+Located in [src/hooks/useCart.ts](file:///d:/Website/safa-kurtilab-main/src/hooks/useCart.ts), it bridges Zustand state with Next.js rendering:
 * Isolates items by combining `productId-size-color` as the cart item ID.
 * Automatically stores the cart state inside the browser's `localStorage` so items persist on page reloads.
 * Prevents Next.js "Hydration Errors" by checking `isHydrated` status before rendering cart layout numbers.
+
+### 5. Legal Compliance Policies (`/policies/[slug]`)
+Located in [src/app/(shop)/policies/[slug]/page.tsx](file:///d:/Website/safa-kurtilab-main/src/app/(shop)/policies/[slug]/page.tsx), this handles dynamic routing for mandatory payment gateway legal compliance policies:
+* **Dynamic SSG Compilation**: Resolves slugs at compilation time using `generateStaticParams` for high speed performance.
+* **Prose Formatting**: Reads local Markdown source templates (Terms, Privacy, Refund, and Shipping policies) from [src/content/policies](file:///d:/Website/safa-kurtilab-main/src/content/policies), parses them using `marked`, and renders them inside a premium, typography-focused styled wrapper.
 
 ---
 
