@@ -1,6 +1,6 @@
 # Safa Kurtilab: Technical Architecture & System Delivery Documentation
 
-This document serves as the technical blueprint and development handbook for the Safa Kurtilab B2B wholesale platform. It records the complete architecture, data models, compliance configurations, performance optimizations, and ingestion pipelines implemented to date.
+This document serves as the comprehensive, step-by-step technical blueprint and development handbook for the Safa Kurtilab B2B wholesale platform. It records the complete architecture, data models, compliance configurations, performance optimizations, and ingestion pipelines implemented to date.
 
 ---
 
@@ -35,97 +35,156 @@ The database relations are defined in `prisma/schema.prisma`. Relationships are 
 
 ---
 
-## 📥 Ingestion Pipeline (50-Product Catalog)
+## 🚀 Step-by-Step Implementation Log
 
-To support automated catalog seeding, we implemented a three-stage ingestion pipeline:
+### Phase 1: Checkout Database Integrity Correction
+* **Issue**: The original checkout pipeline decremented stock values using the shopping cart's internal item ID (`item.id`) rather than the core `Product` model ID (`item.productId`).
+* **Correction Steps**:
+  1. Open [src/app/api/checkout/route.ts](file:///d:/Website/safa-kurtilab-main/src/app/api/checkout/route.ts).
+  2. Modify the product lookup logic under database query blocks:
+     ```typescript
+     // 3. Deduct variant stock in strict real-time
+     for (const item of items) {
+       const dbProduct = await prisma.product.findUnique({
+         where: { id: item.productId }, // Fixed: look up by productId, not item.id
+         include: { variants: true },
+       });
+     ```
+  3. Save the file and compile Next.js to verify TypeScript compilation matches properties.
 
+---
+
+### Phase 2: Setting Up Compliant Legal & Policy Infrastructure
+Razorpay/Cashfree approval rules mandate displaying refund, delivery, terms, and privacy pages in the storefront footer:
+1. **Created Policy Files**:
+   * [src/content/policies/terms.md](file:///d:/Website/safa-kurtilab-main/src/content/policies/terms.md): Sets B2B usage agreements.
+   * [src/content/policies/privacy.md](file:///d:/Website/safa-kurtilab-main/src/content/policies/privacy.md): Documents client cookie storage, secure data storage on Supabase (Mumbai Region), and encryption layers.
+   * [src/content/policies/refund.md](file:///d:/Website/safa-kurtilab-main/src/content/policies/refund.md): Outlines a 7-day wholesale exchange policy for manufacturing defects.
+   * [src/content/policies/shipping.md](file:///d:/Website/safa-kurtilab-main/src/content/policies/shipping.md): Establishes 3-5 business day logistics delivery times for B2B dispatch.
+2. **Added Markdown Rendering Engine**:
+   * Created [src/app/(shop)/policies/[slug]/page.tsx](file:///d:/Website/safa-kurtilab-main/src/app/(shop)/policies/[slug]/page.tsx).
+   * Loaded the markdown parameters dynamically at request runtime:
+     ```typescript
+     const filePath = path.join(process.cwd(), 'src/content/policies', `${params.slug}.md`);
+     const fileContent = await fs.readFile(filePath, 'utf8');
+     ```
+   * Added dynamic generation headers to pre-render the pages statically for sub-millisecond delivery:
+     ```typescript
+     export async function generateStaticParams() {
+       return [{ slug: 'terms' }, { slug: 'privacy' }, { slug: 'refund' }, { slug: 'shipping' }];
+     }
+     ```
+3. **Linked the Global Footer**:
+   * Edited [src/components/shared/Footer.tsx](file:///d:/Website/safa-kurtilab-main/src/components/shared/Footer.tsx).
+   * Appended the legal columns containing direct routes: `/policies/terms`, `/policies/privacy`, `/policies/refund`, `/policies/shipping`.
+
+---
+
+### Phase 3: Customer Passwordless Authentication Integration
+Created a secure customer authentication portal powered by Supabase Auth with client-side sandbox fallbacks:
+1. **Initialized Supabase Engine**:
+   * Created [src/lib/supabase.ts](file:///d:/Website/safa-kurtilab-main/src/lib/supabase.ts).
+   * Coded a client-side wrapper class **`MockSupabaseAuth`** to emulate logins locally if Supabase env keys are absent:
+     * Saves simulated auth sessions in `localStorage`.
+     * Accepts test code `123456` automatically to simulate successful sign-ins.
+2. **Coded Customer Login Page**:
+   * Created [src/app/(shop)/login/page.tsx](file:///d:/Website/safa-kurtilab-main/src/app/(shop)/login/page.tsx).
+   * Supported input forms for **Email Address** and **Phone Number**.
+   * Integrates animated loading states and handles automatic routing redirections.
+3. **Connected Global Navigation Header**:
+   * Edited [src/components/shared/Navbar.tsx](file:///d:/Website/safa-kurtilab-main/src/components/shared/Navbar.tsx).
+   * Configured event listeners to track changes in client auth states:
+     ```typescript
+     supabase.auth.onAuthStateChange((_event, session) => {
+       setAuthUser(session?.user ?? null);
+     });
+     ```
+   * Shows active profile cards (e.g. customer name/email shortcuts) and provides a secure sign-out controller.
+
+---
+
+### Phase 4: UI Performance & Transition Optimizations
+To avoid click latencies (button freezes during network dispatches), we converted standard action handlers into concurrent tasks:
+1. **Added Transition Hooks**:
+   * In [src/components/shop/ProductDetailsClient.tsx](file:///d:/Website/safa-kurtilab-main/src/components/shop/ProductDetailsClient.tsx):
+     ```typescript
+     const [isPending, startTransition] = useTransition();
+     // wrapped bag addition logic in startTransition:
+     startTransition(async () => {
+       await addToBagAction();
+     });
+     ```
+   * In [src/app/(shop)/checkout/page.tsx](file:///d:/Website/safa-kurtilab-main/src/app/(shop)/checkout/page.tsx):
+     ```typescript
+     const [isPending, startTransition] = useTransition();
+     // wrapped simulate payment button execution
+     startTransition(async () => {
+       await handleCheckoutPayment();
+     });
+     ```
+2. **Dynamic UI Indicators**:
+   * Grayed out target buttons during action execution and dynamically set pointer-events to `none` to prevent duplicate checkout submissions.
+
+---
+
+### Phase 5: Ingestion Pipeline & Database Migration (50 Products)
+To bulk ingest 50 unique products across 10 categories with custom size and stock variables:
+1. **Created data script**:
+   * Programmed [scripts/generate-catalog.py](file:///d:/Website/safa-kurtilab-main/scripts/generate-catalog.py) to compile the 50-product catalog, linking them to copyright-free, optimized fashion images from Unsplash.
+2. **Auto-compiled catalog**:
+   * Executed `python scripts/generate-catalog.py` to write raw catalog configurations directly into the root folder at `products.json`.
+3. **Set Up Production DB Seeding Environment**:
+   * Pulled the Vercel production credentials to target the Supabase PostgreSQL database:
+     ```bash
+     npx vercel link --yes
+     npx vercel env pull .env.local --environment production --yes
+     ```
+   * Copied `.env.local` variables directly to `.env` temporarily to feed credentials to the Prisma client engine.
+4. **Created online bulk import API route**:
+   * Created [src/app/api/bulk-import/route.ts](file:///d:/Website/safa-kurtilab-main/src/app/api/bulk-import/route.ts).
+   * The endpoint reads `products.json` and programmatically clears old placeholders before creating 50 new products, each with 5 size variants (S to XXL) and custom stock levels.
+5. **Executed bulk sync**:
+   * Pushed code changes to GitHub to compile and deploy on Vercel.
+   * Triggered the ingestion online:
+     `https://safa-kurtilab-bivv.vercel.app/api/bulk-import?key=safa-bulk-import-9923`
+   * **Result Log**:
+     ```json
+     {
+       "success": true,
+       "message": "Ingestion pipeline completed successfully.",
+       "syncedProducts": 50,
+       "syncedVariants": 250
+     }
+     ```
+6. **Removed Seeding Endpoints for Security**:
+   * Securely deleted the `/api/bulk-import` and `/api/seed` route folders from the filesystem, deleted the local credentials `.env` file, and committed/pushed the cleanup back to GitHub.
+
+---
+
+## 🛠️ Developer Reference: Command Playbook
+
+### 1. Local Run Execution
+Run the following commands to install dependencies and boot the local dev environment:
+```bash
+npm install
+npm run dev
 ```
-[scripts/generate-catalog.py] ---> [products.json] ---> [/api/bulk-import (Vercel)] ---> [Supabase DB]
+
+### 2. Prisma Database Management
+To apply schema adjustments or sync tables with your active Supabase connection pooler:
+```bash
+# Load environmental variables locally
+$env:DATABASE_URL="YOUR_SUPABASE_CONNECTION_STRING"
+
+# Generate local Prisma Client
+npx prisma generate
+
+# Apply local schema changes to database
+npx prisma db push
 ```
 
-### Stage 1: The Python Catalog Compiler (`scripts/generate-catalog.py`)
-Generates 50 distinct products across 10 categories mapping to optimized fashion images on Unsplash.
-* **10 Categories**: *Anarkali, Straight Fit, A-Line, Angrakha, Asymmetric, Jacket Style, Flared & Phiran, Indo-Western, Kaftan Style, Boutique Special.*
-* Outputs clean data directly to `products.json` in the root folder.
-
-### Stage 2: Database Ingestion Interface
-The pipeline can be triggered online or locally:
-1. **Online Route (`/api/bulk-import`)**: A temporary secure Next.js API route that reads `products.json`, deletes old records, and populates the production Supabase database. This runs in Vercel's context where `DATABASE_URL` environment variables are pre-configured.
-2. **Ingestion Loop**:
-   * Generates safe, URL-friendly unique slugs for each product.
-   * Auto-creates size variants (`S`, `M`, `L`, `XL`, `XXL`) and hooks them to the correct product ID.
-   * Populates default color tags and inventory counts.
-
----
-
-## 🔑 Customer OTP Authentication Architecture
-
-To enable passwordless client signups and log in, the authentication framework is built around:
-
-### 1. Unified Client Config (`src/lib/supabase.ts`)
-* Automatically checks for `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-* If keys are missing (such as in local development), it automatically swaps the export with **`MockSupabaseAuth`**, a browser-based simulator. This lets team developers test signups, sign-ins, and checkout validations offline without environment keys.
-
-### 2. Passwordless Flow (`src/app/(shop)/login/page.tsx`)
-* Customers choose **Email** or **Phone Number**.
-* Fires `signInWithOtp` via the client.
-* Once the OTP code is submitted, validates it via `verifyOtp` and triggers a redirect back to the shopping bag.
-
----
-
-## 📄 Legal Compliance Architecture (Payment Gateways)
-
-Payment processors like Razorpay and Cashfree require mandatory customer protection policies inside the storefront footer. We structured this compliance system cleanly:
-
-### 1. Policy Content Files (`src/content/policies/`)
-* **`terms.md`**: Legal terms of service.
-* **`privacy.md`**: Privacy rights, data collection, and hosting details.
-* **`refund.md`**: 7-day B2B wholesale cancellation and refund regulations.
-* **`shipping.md`**: Shipping durations and delivery timelines.
-
-### 2. Dynamic Rendering Route (`src/app/(shop)/policies/[slug]/page.tsx`)
-* Compiles Markdown text dynamically at build-time using `fs` and renders standard styled HTML.
-
-### 3. Global Footer Linkage (`src/components/shared/Footer.tsx`)
-* Integrates all policy URLs in the site footer navigation layout.
-
----
-
-## ⚡ UI Performance & Real-Time Security Optimizations
-
-### 1. Concurrent Transitions (`useTransition`)
-To eliminate lag, interactive actions are wrapped in React 19 `useTransition` blocks:
-* **Add to Bag (`ProductDetailsClient.tsx`)**
-* **Checkout Pay Form (`checkout/page.tsx`)**
-* **Result**: Action functions run asynchronously in the background. The browser remains responsive and interactive.
-
-### 2. Real-Time Stock Integrity Check (`api/checkout/route.ts`)
-Deducts stock volumes during checkout processes safely by mapping product inventory lookups by `item.productId` rather than the shopping cart row item ID.
-
----
-
-## 🛠️ Future Development & Local Run Guidelines
-
-### Running Local Development
-1. Run local dependencies:
-   ```bash
-   npm install
-   ```
-2. Pull database schemas (if you have the connection string set in a local `.env`):
-   ```bash
-   npx prisma db pull
-   npx prisma generate
-   ```
-3. Boot the local Next.js environment:
-   ```bash
-   npm run dev
-   ```
-
-### Regenerating Catalog Data
-If you need to regenerate or add products:
-1. Edit `scripts/generate-catalog.py` to change category lists or name templates.
-2. Run:
-   ```bash
-   python scripts/generate-catalog.py
-   ```
-3. Push to GitHub to let Vercel trigger builds.
+### 3. Re-Running Catalog Seeding
+If you need to refresh or modify the catalog:
+1. Update `scripts/generate-catalog.py` definitions.
+2. Run `python scripts/generate-catalog.py` to compile.
+3. Re-create the temporary `/api/bulk-import` endpoint, deploy, and trigger the URL key to ingest the updates.
