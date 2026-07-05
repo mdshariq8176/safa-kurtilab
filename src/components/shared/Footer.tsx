@@ -40,7 +40,7 @@ export default function Footer() {
       </div>
 
       {/* Main footer grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
         {/* Brand Column */}
         <div className="space-y-4">
           <h4 className="font-serif text-2xl font-bold tracking-widest uppercase">
@@ -106,6 +106,35 @@ export default function Footer() {
             </li>
             <li>
               <span className="text-[#f3d065] font-semibold">GST Registered Billing</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Legal columns */}
+        <div>
+          <h5 className="font-serif text-sm font-semibold text-[#f3d065] tracking-wider uppercase mb-4">
+            Legal & Policies
+          </h5>
+          <ul className="space-y-2.5 text-xs text-white/70">
+            <li>
+              <Link href="/policies/terms" className="hover:text-gold-primary transition-colors">
+                Terms & Conditions
+              </Link>
+            </li>
+            <li>
+              <Link href="/policies/privacy" className="hover:text-gold-primary transition-colors">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/policies/refund" className="hover:text-gold-primary transition-colors">
+                Return & Refund Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/policies/shipping" className="hover:text-gold-primary transition-colors">
+                Shipping & Delivery Policy
+              </Link>
             </li>
           </ul>
         </div>
