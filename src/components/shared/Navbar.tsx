@@ -1,17 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/hooks/useCart';
 import { ShoppingBag, Search, Menu, X, ChevronDown, User, ShieldCheck } from 'lucide-react';
 import CartDrawer from '@/components/shop/CartDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export default function Navbar() {
   const { itemCount } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const [authUser, setAuthUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthUser(session?.user || null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <>
@@ -133,9 +148,18 @@ export default function Navbar() {
               <Search className="w-5.5 h-5.5" />
             </Link>
 
-            {/* Admin Command Icon Shortcut */}
-            <Link href="/admin" className="hidden sm:block p-2 text-charcoal hover:text-emerald-primary transition-colors" title="Admin Panel">
-              <User className="w-5.5 h-5.5" />
+            {/* Customer Login Shortcut */}
+            <Link 
+              href="/login" 
+              className="p-2 text-charcoal hover:text-emerald-primary transition-colors flex items-center gap-1.5" 
+              title={authUser ? `Profile: ${authUser.email || authUser.phone}` : "Customer Login"}
+            >
+              <User className={`w-5.5 h-5.5 ${authUser ? 'text-emerald-primary stroke-[2]' : ''}`} />
+              {authUser && (
+                <span className="hidden lg:inline text-[10px] font-bold uppercase tracking-wider text-emerald-primary">
+                  {authUser.user_metadata?.name || 'Client'}
+                </span>
+              )}
             </Link>
 
             {/* Shopping Cart Button */}
