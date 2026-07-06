@@ -46,10 +46,15 @@ d:\Website\
 │
 ├── scripts/
 │   ├── bulk-import.ts                  # Local node pipeline to import products.json items
+│   ├── csv-import.ts                   # Ingest products.csv draft items and auto-create variants (Prisma)
 │   ├── generate-catalog.py             # Python script generating 50 products using Unsplash resources
+│   ├── get-links.py                    # Generates pre-encoded B2B WhatsApp API redirect links
+│   ├── indiamart-check.py              # Playwright Chrome session supplier crawler
 │   ├── test-live-order.js              # Inter-state webhook transaction tester
+│   ├── urls.txt                        # UTF-8 text file storing generated WhatsApp links
 │   ├── upload-images.js                # Cloudinary image uploader script
-│   └── whatsapp-outreach.py            # Whatsapp PyWhatKit automation sequence for wholesale updates
+│   ├── whatsapp-outreach.py            # Whatsapp PyWhatKit automation sequence for wholesale updates
+│   └── whatsapp_parser.py              # Parses raw WhatsApp text copy and images into products.csv
 │
 ├── public/
 │   └── images/                         # Static image assets for the storefront curation
@@ -83,7 +88,9 @@ d:\Website\
     │       ├── checkout/
     │       │   └── route.ts            # Places orders and deducts size variant inventory stock in real-time
     │       ├── products/
-    │       │   └── route.ts            # API endpoint to fetch products based on category filters
+    │       │   ├── route.ts            # API endpoint to fetch products based on category filters
+    │       │   └── bulk/
+    │       │       └── route.ts        # Ingests new B2B products from products.csv and generates variants
     │       └── webhooks/
     │           └── payment/
     │               └── route.ts        # Payment webhook logic (state-wise GST split, Shiprocket 3PL dispatch)
@@ -386,6 +393,51 @@ Automates order state transitions, triggers return inventory synchronizations, a
      * `cancelled` or `canceled` -> Set `deliveryStatus = 'CANCELLED'`, trigger stock restore.
   3. **Inventory Reverse Synchronization**: If marked as returned or cancelled, queries the database items list, loops through orders inside a database transaction (`prisma.$transaction`), and increments variant stock counts by the ordered amount: `newStock = matchingVariant.stock + item.quantity`.
   4. **Resend Email Notification Dispatch**: Sends dynamic HTML update emails asynchronously to the customer's mailbox using Resend REST APIs (`https://api.resend.com/emails`).
+
+---
+
+### 4.12. B2B Wholesale Minimum Order Quantity (MOQ) Gate-Lock
+Restricts checkout flows unless wholesale parameters are met to enforce a strict B2B model.
+* **MOQ Rule Set**:
+  - Cart must contain at least **5 distinct product variants/items** OR hit a subtotal threshold of **₹5,000**.
+* **Frontend Enforcement**:
+  - **Cart Drawer (`src/components/shop/CartDrawer.tsx`)**: Disables the "Proceed to Checkout" button dynamically and displays a styled warning notice if cart criteria are not met.
+  - **Checkout Page (`src/app/(shop)/checkout/page.tsx`)**: Re-evaluates MOQ parameters. If bypassed via URL entry, locks the form submission and redirects or alerts the buyer about the wholesale requirement.
+
+---
+
+### 4.13. White-Label Shipping Label Generator & Category-Based RTO Routing
+Generates Delhivery printable B2B shipping labels and handles automated category-based returns routing.
+* **White-Label Origin**:
+  - Automatically overwrites 'Sender/Origin' details on printable manifests with the permanent registered headquarters address: `Safa Kurtilab, Vill-Hareknagar Mollabari, P.O. Hareknagar, P.S. Beldanga, District: Murshidabad, West Bengal - 742133`.
+  - Overwrites 'Pickup/Warehouse Location' dynamically using the manufacturer/wholesaler warehouse address mapped inside product metadata.
+* **Category-Based Return to Origin (RTO)**:
+  - If an order's status transitions to `RETURNED`, the system maps the return route directly back to the specific manufacturing plant address (e.g. Sanganer/Jaipur for cotton, Sachin GIDC/Surat for silk/synthetic) instead of Murshidabad, minimizing secondary logistics overhead.
+
+---
+
+### 4.14. IndiaMART Playwright Chrome Session Supplier Crawler (`scripts/indiamart-check.py`)
+Queries verified supplier nodes securely utilizing logged-in local Google Chrome user profiles.
+* **Mechanics**:
+  1. Spawns Chromium using `launch_persistent_context` referencing the native Windows user profile path `~\AppData\Local\Google\Chrome\User Data`.
+  2. Bypasses Cloudflare firewalls and bot detection rules using `--disable-blink-features=AutomationControlled` headers.
+  3. Queries target listing search pages in headed mode, simulating real user behavior (idle timings).
+  4. Scrapes and logs verified business parameters (`company_name`, `contact_node`) safely into console logs.
+  5. Built using CP1252-safe ASCII markers (`[FETCH]`, `[OK]`, `[ERROR]`) to prevent terminal character map encoding crashes on Windows.
+
+---
+
+### 4.15. WhatsApp Parser & Bulk Database Ingestion Pipeline
+Automates importing raw WhatsApp B2B text/image arrays into Prisma database tables.
+* **Mechanics**:
+  1. **Python Parser (`scripts/whatsapp_parser.py`)**:
+     * Extracts base rates (e.g., `Rate 695+gst`), computes wholesale listing prices with 5% GST markup, parses fabrics/categories, and formats Cloudinary mockup URLs.
+     * Appends rows to `src/data/products.csv` using a semicolon separated format for sizes (`S;M;L;XL;XXL`) and images to prevent CSV column splitting conflicts.
+  2. **Bulk Ingestion API Route (`POST /api/products/bulk`)**:
+     * Parses `src/data/products.csv` directly, ingests entries flagged with status `"Draft"`, automatically registers corresponding S-XXL size variants, and commits updates to Supabase inside transaction blocks.
+     * Automatically overwrites the CSV status of ingested rows to `"Published"` on disk to prevent double ingestion.
+  3. **Local CLI Importer (`scripts/csv-import.ts`)**:
+     * Provides a console-based fallback using tsx to directly trigger transaction-safe database ingestion from `src/data/products.csv`.
 
 ---
 
