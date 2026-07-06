@@ -1,56 +1,134 @@
+# -*- coding: utf-8 -*-
 # scripts/whatsapp-outreach.py
-import pywhatkit as whatsapp
-import datetime
-import time
+import os
+import sys
+import asyncio
+import urllib.parse
 
-# Wholesalers phone numbers (including Country Code +91)
-WHOM_TO_MESSAGE = [
-    "+919851483596",  # Safa Kurtilab primary wholesaler contact
-    "+917003518485"   # Shariq secondary wholesaler contact
+try:
+    from playwright.async_api import async_playwright
+except ImportError:
+    async_playwright = None
+
+# List of 10 verified kurti manufacturers and suppliers
+TARGET_VENDORS = [
+    {"name": "Kesaria Textile Company", "phone": "919081995544", "hub": "Surat", "specialty": "wholesale catalog printed kurtis"},
+    {"name": "Ajmera Fashion", "phone": "918849429440", "hub": "Surat", "specialty": "designer rayon & silk kurtis"},
+    {"name": "Dushyantt Bhalla (Jaipur Ethnic)", "phone": "919351268123", "hub": "Jaipur", "specialty": "pure cotton printed kurtis & suits"},
+    {"name": "Snehal Creation", "phone": "919769539989", "hub": "Mumbai/Jaipur", "specialty": "premium ethnic tunics & Kurtis"},
+    {"name": "Arihant Creations", "phone": "917790905301", "hub": "Jaipur", "specialty": "traditional handwork & Sanganeri sets"},
+    {"name": "Harsh Creation", "phone": "919928922028", "hub": "Jaipur", "specialty": "printed plazo sets & ethnic kurtis"},
+    {"name": "SYASII Designers", "phone": "919054440333", "hub": "Surat", "specialty": "trendy casual kurtis & western tunics"},
+    {"name": "Maaesa Creations", "phone": "916350033577", "hub": "Jaipur", "specialty": "premium cotton ethnic clothing"},
+    {"name": "Juniper Fashion", "phone": "919828045242", "hub": "Jaipur", "specialty": "high-end designer ethnic sets"},
+    {"name": "Wholesale Kurties by Shagun", "phone": "919654258007", "hub": "Delhi", "specialty": "Lucknowi Chikankari & georgette sets"}
 ]
 
-# Automated Message Template
-MESSAGE_TEMPLATE = (
-    "নমস্কার দাদা, সাফা কুর্তি ল্যাব থেকে বলছি।\n\n"
-    "দয়া করে এই সপ্তাহের নতুন কালেকশনের ড্রাইভ লিঙ্ক (Drive Link) "
-    "এবং ইনভেন্টরি ক্যাটালগ শিটটি (Excel/CSV) একটু শেয়ার করুন। "
-    "আমি ওয়েবসাইটে বাল্ক আপলোড স্টার্ট করব। ধন্যবাদ!"
-)
+def get_production_ready_pitch(vendor):
+    """
+    Bilingual (English + Hindi) professional wholesale pitch layout.
+    Incorporate West Bengal registered address, primary WhatsApp and alternate WhatsApp contact details.
+    """
+    bilingual_pitch = (
+        f"Hello,\n"
+        f"I am MD SHARIQ, Founder of 'Safa Kurtilab'. We operate a registered B2B Wholesale & Order Forwarding Portal. "
+        f"We are highly interested in listing your {vendor['hub']} hub's {vendor['specialty']} collections on our platform to generate consistent bulk volume orders.\n\n"
+        f"Our operations are strictly tailored for 'Set-to-Set' (S, M, L, XL, XXL Bundle) distribution with immediate prepaid factory clearing.\n\n"
+        f"-----------------------------------------\n"
+        f"नमस्ते,\n"
+        f"मैं MD SHARIQ बोल रहा हूँ 'Safa Kurtilab' से। हमारा एक रजिस्टर्ड B2B Wholesale & Order Forwarding Portal है। "
+        f"हम आपके {vendor['hub']} हब के {vendor['specialty']} कलेक्शन को हमारे प्लेटफॉर्म पर लिस्ट करके डायरेक्ट बल्क ऑर्डर्स जेनरेट करना चाहते हैं।\n\n"
+        f"हमारा मॉडल पूरी तरह से 'Strict Set-to-Set' (S, M, L, XL, XXL Bundle) और डायरेक्ट फैक्ट्री-टू-कस्टमर शिपिंग पर काम करता है।\n\n"
+        f"-----------------------------------------\n"
+        f"BUSINESS CREDENTIALS / व्यावसायिक विवरण:\n"
+        f"• Company Name: Safa Kurtilab\n"
+        f"• Business Type: B2B Wholesale / Garment Distribution\n"
+        f"• Registered Address: Vill-Hareknagar Mollabari, P.O. Hareknagar, P.S. Beldanga, District: Murshidabad, West Bengal - 742133\n"
+        f"• Operational Base: Kolkata & Chennai\n"
+        f"• Order Modality: Strict Set-to-Set Bundles / Immediate Prepaid Wire Transfer\n\n"
+        f"-----------------------------------------\n"
+        f"Kindly share your latest 'Set-to-Set' digital catalog, Ex-factory bulk price sheet, and HD images Google Drive link with us.\n\n"
+        f"कृपया आपका लेटेस्ट 'Set-to-Set' डिजिटल कैटलॉग, एक्स-फैक्ट्री बल्क प्राइस शीट (Ex-factory Bulk Price Sheet) और गूगल ड्राइव इमेज लिंक हमारे इस नंबर पर शेयर करें।\n\n"
+        f"Alternate WhatsApp Contact: +91-9851483596\n\n"
+        f"Best Regards / धन्यवाद,\n"
+        f"MD SHARIQ\n"
+        f"Founder, Safa Kurtilab\n"
+        f"Primary WhatsApp: +91-7003518485"
+    )
+    return bilingual_pitch
 
-def send_weekly_outreach():
-    print("🚀 Starting automated WhatsApp outreach sequence...")
+async def run_whatsapp_outreach():
+    if not async_playwright:
+        print("[ERROR] Playwright is not installed. Run 'pip install playwright' and 'playwright install chrome'.")
+        return
+
+    print("[INFO] Initializing Secure Browser Session attaching to Chrome Profile...")
+    user_data_dir = os.path.expanduser("~\\AppData\\Local\\Google\\Chrome\\User Data")
     
-    for phone_number in WHOM_TO_MESSAGE:
-        print(f"Scheduling WhatsApp message to {phone_number}...")
+    try:
+        browser_context = await p.chromium.launch_persistent_context(
+            user_data_dir=user_data_dir,
+            headless=False,
+            channel="chrome",
+            args=["--disable-blink-features=AutomationControlled"]
+        )
+        page = await browser_context.new_page()
         
-        # Calculate standard delivery time offsets (2 minutes from now, as required by pywhatkit)
-        now = datetime.datetime.now()
-        send_hour = now.hour
-        send_minute = now.minute + 2
+        # Load WhatsApp Web and wait for the user to be logged in
+        print("[INFO] Loading WhatsApp Web...")
+        await page.goto("https://web.whatsapp.com/")
+        print("[INFO] Please verify you are logged in on the browser. Waiting 15 seconds for UI elements...")
+        await asyncio.sleep(15)
         
-        # Adjust for hour boundaries
-        if send_minute >= 60:
-            send_hour = (send_hour + 1) % 24
-            send_minute = send_minute - 60
+        for idx, vendor in enumerate(TARGET_VENDORS, 1):
+            pitch = get_production_ready_pitch(vendor)
+            # Explicitly encode to utf-8 before quoting to prevent Windows cp1252 corruption
+            encoded_pitch = urllib.parse.quote(pitch.encode('utf-8'))
+            send_url = f"https://web.whatsapp.com/send?phone={vendor['phone']}&text={encoded_pitch}"
+            
+            print(f"\n[{idx}/10] Redirecting to chat with: {vendor['name']} ({vendor['phone']})...")
+            await page.goto(send_url)
+            
+            # Wait for chat input load (up to 15s)
+            await asyncio.sleep(8)
+            
+            try:
+                # Select the send button or hit Enter
+                send_button = page.locator("span[data-icon='send']")
+                if await send_button.count() > 0:
+                    await send_button.click()
+                    print(f"[OK] Message successfully queued for: {vendor['name']}")
+                else:
+                    await page.keyboard.press("Enter")
+                    print(f"[OK] Keyboard Enter triggered for: {vendor['name']}")
+            except Exception as send_err:
+                print(f"[ERROR] Failed to send message to {vendor['name']}: {send_err}")
+                
+            await asyncio.sleep(4) # Delay between messages to avoid spam trigger
 
-        try:
-            # Opens WhatsApp Web to type and send messages automatically
-            whatsapp.sendwhatmsg(
-                phone_no=phone_number,
-                message=MESSAGE_TEMPLATE,
-                time_hour=send_hour,
-                time_min=send_minute,
-                wait_time=15, # Wait 15s for WhatsApp Web window rendering
-                tab_close=True, # Auto-close active tab after sending
-                close_time=3
-            )
-            print(f"✅ Message scheduled successfully for {phone_number} at {send_hour:02d}:{send_minute:02d}.")
-        except Exception as e:
-            print(f"❌ Failed scheduling message for {phone_number}: {e}")
-            print("💡 Ensure you have a logged-in WhatsApp Web session in your default browser.")
+        await browser_context.close()
+        print("\n[INFO] Outreach campaign complete.")
         
-        # Safety interval between outreach calls
-        time.sleep(5)
+    except Exception as e:
+        print(f"[ERROR] Could not attach browser context: {e}")
+        print("[INFO] Make sure Chrome is closed before running the script.")
 
 if __name__ == "__main__":
-    send_weekly_outreach()
+    if len(sys.argv) > 1 and sys.argv[1] == "print":
+        # Print first vendor's pitch encoded in utf-8 directly to terminal output bytes
+        sys.stdout.buffer.write(get_production_ready_pitch(TARGET_VENDORS[0]).encode('utf-8'))
+        sys.stdout.write('\n')
+    else:
+        if sys.platform == 'win32':
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        
+        # Helper call
+        async def main_runner():
+            async with async_playwright() as p:
+                await run_whatsapp_outreach()
+        
+        # Async run if playwright is imported
+        if async_playwright:
+            asyncio.run(main_runner())
+        else:
+            print("[ERROR] Playwright module missing. Install it to run automation.")
