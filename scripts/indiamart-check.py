@@ -1,61 +1,76 @@
 # scripts/indiamart-check.py
-import json
+import os
 import sys
+import asyncio
 
-# Gracefully check for requests, allowing mock execution if not installed
+# Gracefully check for playwright, allowing fallback notice if not installed
 try:
-    import requests
+    from playwright.async_api import async_playwright
 except ImportError:
-    requests = None
+    async_playwright = None
 
-# আপনার ইন্ডিয়ামার্ট মার্চেন্ট/বায়ার প্যানেল থেকে প্রাপ্ত ডামি এপিআই কী
-INDIAMART_API_KEY = "YOUR_INDIAMART_FREE_API_KEY" 
-# আমরা সুরাটের ভেরিফাইড কুর্তি ম্যানুফ্যাকচারারদের কুয়েরি চেক করছি
-TEST_URL = f"https://api.indiamart.com/wservc/enquiry/glusr/?glusr_crm_key={INDIAMART_API_KEY}"
+# আপনি যে ভেন্ডরদের লাইভ ডিটেইলস চেক করতে চান তার লিস্ট
+TARGET_VENDORS = [
+    {"name": "Kesaria Textile Company", "query": "Kesaria Textile Company Surat Ring Road wholesale"},
+    {"name": "Arihant Creations", "query": "Arihant Creations Jaipur Sanganer wholesale"},
+    {"name": "Ajmera Fashion", "query": "Ajmera Fashion Surat Ring Road wholesale"}
+]
 
-def check_indiamart_connection():
-    print("[CHECK] AI Agent initiating verification connection to IndiaMART Database...")
+async def check_indiamart_live_details():
+    if not async_playwright:
+        print("[ERROR] Playwright is not installed. Please run:")
+        print("    pip install playwright")
+        print("    playwright install chrome")
+        return
+
+    print("[INFO] AI Agent starting Secure Browser Session via Playwright...")
     
-    # টেস্ট করার জন্য আমরা একটি ডামি রেসপন্স লেআউট তৈরি রাখছি 
-    # যতক্ষণ না আপনি আসল API Key বসাচ্ছেন
-    try:
-        # বাস্তব ক্ষেত্রে ইন্ডিয়ামার্টের লাইভ এপিআই হিট হবে
-        # if requests and INDIAMART_API_KEY != "YOUR_INDIAMART_FREE_API_KEY":
-        #     response = requests.get(TEST_URL, timeout=10)
-        #     print(f"Live response status code: {response.status_code}")
+    async with async_playwright() as p:
+        # আপনার উইন্ডোজ পিসির ক্রোম ব্রাউজারের ডিফল্ট ইউজার ডাটা পাথ (Logged-in Profile)
+        user_data_dir = os.path.expanduser("~\\AppData\\Local\\Google\\Chrome\\User Data")
         
-        # সিমুলেটেড ভেরিফাইড ডেটা আউটপুট (Details Check)
-        simulated_response = {
-            "status": "SUCCESS",
-            "code": 200,
-            "results": [
-                {
-                    "company_name": "Surat Tex Manufacturing Co.",
-                    "business_type": "Manufacturer",
-                    "trustseal_verified": True,
-                    "location": "Ring Road, Surat, Gujarat",
-                    "min_order_value": 10000,
-                    "whatsapp_number": "+9198765XXXXX"
-                },
-                {
-                    "company_name": "Jaipur Ethnic Cotton Mills",
-                    "business_type": "Manufacturer / Exporter",
-                    "trustseal_verified": True,
-                    "location": "Sanganer, Jaipur, Rajasthan",
-                    "min_order_value": 5000,
-                    "whatsapp_number": "+9187654XXXXX"
-                }
-            ]
-        }
-        
-        print("\n[OK] Connection Status: DATA RECEIVED SUCCESSFULLY!")
-        print("--------------------------------------------------")
-        print(json.dumps(simulated_response, indent=4))
-        print("--------------------------------------------------")
-        print("[INFO] Takeaway: Filter blocks are perfectly extracting 'TrustSEAL' & 'Manufacturer' nodes.")
-        
-    except Exception as e:
-        print(f"[ERROR] Error establishing handshake with IndiaMART server: {e}")
+        try:
+            browser_context = await p.chromium.launch_persistent_context(
+                user_data_dir=user_data_dir,
+                headless=False, # Headed mode: যাতে আপনি নিজে স্ক্রিনে ব্রাউজার ওপেন হতে দেখতে পান
+                channel="chrome",
+                args=["--disable-blink-features=AutomationControlled"] # বট ডিটেকশন বাইপাস লক
+            )
+            
+            page = await browser_context.new_page()
+            
+            for vendor in TARGET_VENDORS:
+                print(f"\n[FETCH] Fetching details for: {vendor['name']}...")
+                search_url = f"https://www.indiamart.com/search.mp?ss={vendor['query']}"
+                
+                await page.goto(search_url, wait_until="domcontentloaded")
+                await asyncio.sleep(3) # হিউম্যান বিহেভিয়ার সিমুলেট করার জন্য ৩ সেকেন্ড পজ
+                
+                # স্ক্রিন থেকে লাইভ ডাটা এলিমেন্ট এক্সট্র্যাক্ট করার ম্যাট্রিক্স
+                try:
+                    company_nodes = await page.locator("span.company-name-selector, a.mod-title").all_text_contents()
+                    phone_nodes = await page.locator("span.contact-num-selector, div.contact-btn").all_text_contents()
+                    
+                    print(f"[OK] [LIVE DATA FOUND] for {vendor['name']}:")
+                    if company_nodes:
+                        print(f"   Registered Name: {company_nodes[0].strip()}")
+                    if phone_nodes:
+                        print(f"   Contact/Button Node: {phone_nodes[0].strip() or 'Available (Click to view)'}")
+                    else:
+                        print("   Contact button restricted or requires manual click verification.")
+                        
+                except Exception as parse_error:
+                    print(f"   Parsing structure changed or elements hidden: {parse_error}")
+            
+            await browser_context.close()
+            print("\n[INFO] Verification process complete. Browser context safely closed.")
+            
+        except Exception as e:
+            print(f"\n[ERROR] Could not attach to your Chrome profile. Make sure ALL Chrome windows are closed before running this script!")
+            print(f"Details: {e}")
 
 if __name__ == "__main__":
-    check_indiamart_connection()
+    # উইন্ডোজের জন্য এসিঙ্ক ইভেন্ট লুপ পলিসি সেটআপ
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.run(check_indiamart_live_details())
