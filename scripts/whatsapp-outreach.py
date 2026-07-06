@@ -57,14 +57,13 @@ def get_production_ready_pitch(vendor):
     )
     return bilingual_pitch
 
-async def run_whatsapp_outreach():
+async def run_whatsapp_outreach(p):
     if not async_playwright:
         print("[ERROR] Playwright is not installed. Run 'pip install playwright' and 'playwright install chrome'.")
         return
 
-    print("[INFO] Initializing Secure Browser Session attaching to Chrome Profile...")
-    user_data_dir = os.path.expanduser("~\\AppData\\Local\\Google\\Chrome\\User Data")
-    
+    print("[INFO] Launching isolated Chrome browser context for WhatsApp outreach...")
+    user_data_dir = r"d:\Website\safa-kurtilab-main\.whatsapp-session"
     try:
         browser_context = await p.chromium.launch_persistent_context(
             user_data_dir=user_data_dir,
@@ -77,8 +76,8 @@ async def run_whatsapp_outreach():
         # Load WhatsApp Web and wait for the user to be logged in
         print("[INFO] Loading WhatsApp Web...")
         await page.goto("https://web.whatsapp.com/")
-        print("[INFO] Please verify you are logged in on the browser. Waiting 15 seconds for UI elements...")
-        await asyncio.sleep(15)
+        print("[INFO] PLEASE SCAN THE QR CODE ON YOUR SCREEN TO LOG IN (if not already logged in). Waiting 25 seconds...")
+        await asyncio.sleep(25)
         
         for idx, vendor in enumerate(TARGET_VENDORS, 1):
             pitch = get_production_ready_pitch(vendor)
@@ -120,12 +119,12 @@ if __name__ == "__main__":
         sys.stdout.write('\n')
     else:
         if sys.platform == 'win32':
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
         
         # Helper call
         async def main_runner():
             async with async_playwright() as p:
-                await run_whatsapp_outreach()
+                await run_whatsapp_outreach(p)
         
         # Async run if playwright is imported
         if async_playwright:
