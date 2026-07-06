@@ -10,18 +10,18 @@ try:
 except ImportError:
     async_playwright = None
 
-# List of 10 verified kurti manufacturers and suppliers
+# List of 10 new verified Kurti manufacturers and suppliers
 TARGET_VENDORS = [
-    {"name": "Kesaria Textile Company", "phone": "919081995544", "hub": "Surat", "specialty": "wholesale catalog printed kurtis"},
-    {"name": "Ajmera Fashion", "phone": "918849429440", "hub": "Surat", "specialty": "designer rayon & silk kurtis"},
-    {"name": "Dushyantt Bhalla (Jaipur Ethnic)", "phone": "919351268123", "hub": "Jaipur", "specialty": "pure cotton printed kurtis & suits"},
-    {"name": "Snehal Creation", "phone": "919769539989", "hub": "Mumbai/Jaipur", "specialty": "premium ethnic tunics & Kurtis"},
-    {"name": "Arihant Creations", "phone": "917790905301", "hub": "Jaipur", "specialty": "traditional handwork & Sanganeri sets"},
-    {"name": "Harsh Creation", "phone": "919928922028", "hub": "Jaipur", "specialty": "printed plazo sets & ethnic kurtis"},
-    {"name": "SYASII Designers", "phone": "919054440333", "hub": "Surat", "specialty": "trendy casual kurtis & western tunics"},
-    {"name": "Maaesa Creations", "phone": "916350033577", "hub": "Jaipur", "specialty": "premium cotton ethnic clothing"},
-    {"name": "Juniper Fashion", "phone": "919828045242", "hub": "Jaipur", "specialty": "high-end designer ethnic sets"},
-    {"name": "Wholesale Kurties by Shagun", "phone": "919654258007", "hub": "Delhi", "specialty": "Lucknowi Chikankari & georgette sets"}
+    {"name": "7 Season's", "phone": "917621889900", "hub": "Surat", "specialty": "high-end designer flared & cotton kurtis"},
+    {"name": "Kasheesh Trendz", "phone": "919726008828", "hub": "Surat", "specialty": "double layer kurtis & heavy handwork sets"},
+    {"name": "Vardan Designer", "phone": "917984516699", "hub": "Surat", "specialty": "rayon & silk fancy boutique kurtis"},
+    {"name": "Rajnandini Fashion", "phone": "918141521000", "hub": "Surat", "specialty": "daily cotton printed sets & straight kurtis"},
+    {"name": "Jaipur Kurti House", "phone": "917942824456", "hub": "Jaipur", "specialty": "traditional Jaipuri & block printed kurti sets"},
+    {"name": "Tathastu (The Ethnic World)", "phone": "918866591335", "hub": "Surat", "specialty": "premium gota-patti & Anarkali catalogs"},
+    {"name": "Shree Karni Fashion", "phone": "918047516883", "hub": "Surat", "specialty": "georgette, rayon, & designer printed kurtis"},
+    {"name": "Shree Balaji Impex", "phone": "917942722049", "hub": "Jaipur", "specialty": "cotton kurtis, palazzo sets & ethnic bottoms"},
+    {"name": "Ambica Fashion", "phone": "918047619644", "hub": "Surat", "specialty": "embroidered kurtis & bulk boutique specials"},
+    {"name": "Bijalee Kurtis", "phone": "918071269350", "hub": "Ahmedabad", "specialty": "designer cotton & festive kurti collections"}
 ]
 
 def get_production_ready_pitch(vendor):
