@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { useCartStore } from '@/hooks/useCart';
 import { Star, Shield, Truck, RotateCcw, AlertTriangle, Sparkles, Ruler } from 'lucide-react';
@@ -29,9 +29,8 @@ interface ProductDetailsClientProps {
   product: Product;
 }
 
-export default function ProductDetailsClient({ product }: ProductDetailsClientProps) {
+  export default function ProductDetailsClient({ product }: ProductDetailsClientProps) {
   const addItem = useCartStore((state) => state.addItem);
-  const [isPending, startTransition] = useTransition();
 
   // Group unique colors and sizes available
   const availableColors = Array.from(new Set(product.variants.map((v) => v.color)));
@@ -60,26 +59,24 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
-    startTransition(() => {
-      // Add to cart state
-      addItem({
-        productId: product.id,
-        title: product.title,
-        price: product.basePrice,
-        discount: product.discount,
-        image: product.images,
-        size: selectedSize,
-        color: selectedColor,
-      });
-
-      // Alert successful addition with animated drawer trigger
-      setIsAddedSuccessfully(true);
-      setTimeout(() => setIsAddedSuccessfully(false), 2500);
-
-      // Open standard cart drawer (simulate navbar click)
-      const cartButton = document.querySelector('button[class*="bg-emerald-primary"]') as HTMLButtonElement;
-      if (cartButton) cartButton.click();
+    // Add to cart state
+    addItem({
+      productId: product.id,
+      title: product.title,
+      price: product.basePrice,
+      discount: product.discount,
+      image: product.images,
+      size: selectedSize,
+      color: selectedColor,
     });
+
+    // Alert successful addition with animated drawer trigger
+    setIsAddedSuccessfully(true);
+    setTimeout(() => setIsAddedSuccessfully(false), 2500);
+
+    // Open standard cart drawer (simulate navbar click)
+    const cartButton = document.querySelector('button[class*="bg-emerald-primary"]') as HTMLButtonElement;
+    if (cartButton) cartButton.click();
   };
 
   return (
@@ -214,14 +211,14 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
           <div className="flex gap-4">
             <button
               onClick={handleAddToCart}
-              disabled={isOutOfStock || isPending}
+              disabled={isOutOfStock || isAddedSuccessfully}
               className={`flex-1 py-4 font-bold text-xs tracking-widest uppercase transition-all rounded shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
                 isOutOfStock
                   ? 'bg-charcoal/10 text-charcoal/40 cursor-not-allowed border border-charcoal/5 shadow-none'
                   : 'bg-emerald-primary hover:bg-emerald-light text-white'
               }`}
             >
-              {isOutOfStock ? 'Sold Out' : isPending ? 'Adding to Bag...' : isAddedSuccessfully ? 'Added to Trousseau!' : 'Add to Bag'}
+              {isOutOfStock ? 'Sold Out' : isAddedSuccessfully ? 'Added to Trousseau!' : 'Add to Bag'}
             </button>
           </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { ShoppingBag, ShieldCheck, CreditCard, ChevronRight, CheckCircle, AlertTriangle, Sparkles, Building } from 'lucide-react';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ export default function CheckoutPage() {
 
   // UI state
   const [gstinError, setGwinError] = useState(''); // Typo from original was resolved
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'form' | 'modal' | 'success'>('form');
   const [createdOrderId, setCreatedOrderId] = useState('');
   const [paidAmount, setPaidAmount] = useState(0);
@@ -76,76 +76,77 @@ export default function CheckoutPage() {
   };
 
   // Simulate remote transaction capture and write database records
-  const handleSimulatePayment = (status: 'SUCCESS' | 'FAIL') => {
+  const handleSimulatePayment = async (status: 'SUCCESS' | 'FAIL') => {
     if (status === 'FAIL') {
       alert('Simulated transaction failed. Please review payment method or retry.');
       setPaymentStep('form');
       return;
     }
 
-    startTransition(async () => {
-      try {
-        // Send cart payload to our mock order creation API
-        const response = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            items: items.map((item) => ({
-              id: item.productId,
-              title: item.title,
-              price: item.price - item.price * (item.discount / 100),
-              quantity: item.quantity,
-              size: item.size,
-              color: item.color,
-            })),
-            totalAmount: grandTotal,
-            gstAmount: gstAmount,
-            gstin: formData.isB2B ? formData.gstin : null,
-            companyName: formData.isB2B ? formData.companyName : null,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            city: formData.city,
-            state: formData.state,
-            pincode: formData.pincode,
-          }),
-        });
+    setIsLoading(true);
+    try {
+      // Send cart payload to our mock order creation API
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            id: item.productId,
+            title: item.title,
+            price: item.price - item.price * (item.discount / 100),
+            quantity: item.quantity,
+            size: item.size,
+            color: item.color,
+          })),
+          totalAmount: grandTotal,
+          gstAmount: gstAmount,
+          gstin: formData.isB2B ? formData.gstin : null,
+          companyName: formData.isB2B ? formData.companyName : null,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+        }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok) {
-          // Trigger automated payment webhook to run MTO logistics (Shiprocket) and Indian GST splitting
-          try {
-            await fetch('/api/webhooks/payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                event: 'payment.captured',
-                orderId: data.orderId,
-              }),
-            });
-          } catch (webhookError) {
-            console.error('Failed to trigger background automation webhook:', webhookError);
-          }
-
-          setCreatedOrderId(data.orderId);
-          setPaidAmount(grandTotal);
-          setPaymentStep('success');
-          clearCart();
-        } else {
-          alert('Failed to register order: ' + data.error);
-          setPaymentStep('form');
+      if (response.ok) {
+        // Trigger automated payment webhook to run MTO logistics (Shiprocket) and Indian GST splitting
+        try {
+          await fetch('/api/webhooks/payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              event: 'payment.captured',
+              orderId: data.orderId,
+            }),
+          });
+        } catch (webhookError) {
+          console.error('Failed to trigger background automation webhook:', webhookError);
         }
-      } catch (error) {
-        console.error(error);
-        alert('Internal network error creating order.');
+
+        setCreatedOrderId(data.orderId);
+        setPaidAmount(grandTotal);
+        setPaymentStep('success');
+        clearCart();
+      } else {
+        alert('Failed to register order: ' + data.error);
         setPaymentStep('form');
       }
-    });
+    } catch (error) {
+      console.error(error);
+      alert('Internal network error creating order.');
+      setPaymentStep('form');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (paymentStep === 'success') {
@@ -501,7 +502,7 @@ export default function CheckoutPage() {
                   <p className="text-[11px] text-white/60">GST Registered Invoice ID: MOCK_RZP_INTENT_90812</p>
                 </div>
 
-                {isPending ? (
+                {isLoading ? (
                   <div className="py-6 flex flex-col items-center justify-center gap-3">
                     <div className="w-10 h-10 border-4 border-[#f3d065] border-t-transparent rounded-full animate-spin" />
                     <span className="text-xs text-white/70">Broadcasting transaction to Maison servers...</span>

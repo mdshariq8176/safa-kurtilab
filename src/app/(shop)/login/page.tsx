@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { ShieldCheck, Mail, Phone, Lock, Sparkles, LogOut, ArrowRight, User } from 'lucide-react';
@@ -9,7 +9,7 @@ import type { Session } from '@supabase/supabase-js';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auth State
   const [session, setSession] = useState<Session | null>(null);
@@ -34,68 +34,75 @@ export default function LoginPage() {
   }, []);
 
   // Request OTP trigger
-  const handleRequestOtp = (e: React.FormEvent) => {
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputVal) return;
 
     setErrorMessage('');
     setStatusMessage('');
+    setIsLoading(true);
 
-    startTransition(async () => {
-      try {
-        const payload = authMethod === 'email' ? { email: inputVal } : { phone: inputVal };
-        const { error } = await supabase.auth.signInWithOtp(payload);
+    try {
+      const payload = authMethod === 'email' ? { email: inputVal } : { phone: inputVal };
+      const { error } = await supabase.auth.signInWithOtp(payload);
 
-        if (error) {
-          setErrorMessage(error.message);
-        } else {
-          setStatusMessage(`A 6-digit verification code has been dispatched to your ${authMethod === 'email' ? 'email address' : 'phone number'}.`);
-          setOtpStep('verify');
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Verification request failed.';
-        setErrorMessage(msg);
+      if (error) {
+        setErrorMessage(error.message);
+      } else {
+        setStatusMessage(`A 6-digit verification code has been dispatched to your ${authMethod === 'email' ? 'email address' : 'phone number'}.`);
+        setOtpStep('verify');
       }
-    });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Verification request failed.';
+      setErrorMessage(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Submit/Verify OTP trigger
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otpCode.length !== 6) return;
 
     setErrorMessage('');
+    setIsLoading(true);
 
-    startTransition(async () => {
-      try {
-        const { data, error } = authMethod === 'email'
-          ? await supabase.auth.verifyOtp({ email: inputVal, token: otpCode, type: 'email' })
-          : await supabase.auth.verifyOtp({ phone: inputVal, token: otpCode, type: 'sms' });
+    try {
+      const { data, error } = authMethod === 'email'
+        ? await supabase.auth.verifyOtp({ email: inputVal, token: otpCode, type: 'email' })
+        : await supabase.auth.verifyOtp({ phone: inputVal, token: otpCode, type: 'sms' });
 
-        if (error) {
-          setErrorMessage(error.message);
-        } else if (data.session) {
-          setStatusMessage('Login authenticated successfully. Redirecting you to Maison Safa...');
-          setTimeout(() => {
-            router.push('/');
-          }, 1500);
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'OTP verification failed.';
-        setErrorMessage(msg);
+      if (error) {
+        setErrorMessage(error.message);
+      } else if (data.session) {
+        setStatusMessage('Login authenticated successfully. Redirecting you to Maison Safa...');
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
       }
-    });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'OTP verification failed.';
+      setErrorMessage(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Sign out trigger
-  const handleSignOut = () => {
-    startTransition(async () => {
+  const handleSignOut = async () => {
+    setIsLoading(true);
+    try {
       await supabase.auth.signOut();
       setOtpStep('request');
       setInputVal('');
       setOtpCode('');
       setStatusMessage('Signed out successfully.');
-    });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -150,11 +157,11 @@ export default function LoginPage() {
 
                 <button
                   onClick={handleSignOut}
-                  disabled={isPending}
+                  disabled={isLoading}
                   className="w-full py-3.5 border border-charcoal/10 hover:border-red-500 hover:text-red-500 text-charcoal text-xs font-bold tracking-widest uppercase rounded transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-4 h-4" />
-                  {isPending ? 'Logging Out...' : 'Sign Out'}
+                  {isLoading ? 'Logging Out...' : 'Sign Out'}
                 </button>
               </div>
             </motion.div>
@@ -225,11 +232,11 @@ export default function LoginPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isPending}
+                    disabled={isLoading}
                     className="w-full py-3.5 bg-emerald-primary hover:bg-emerald-light disabled:bg-emerald-primary/60 text-white text-xs font-bold tracking-widest uppercase rounded shadow transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     <ShieldCheck className="w-4.5 h-4.5" />
-                    {isPending ? 'Requesting Code...' : 'Send Verification OTP'}
+                    {isLoading ? 'Requesting Code...' : 'Send Verification OTP'}
                   </button>
                 </form>
               ) : (
@@ -263,10 +270,10 @@ export default function LoginPage() {
                   <div className="space-y-3">
                     <button
                       type="submit"
-                      disabled={isPending || otpCode.length !== 6}
+                      disabled={isLoading || otpCode.length !== 6}
                       className="w-full py-3.5 bg-emerald-primary hover:bg-emerald-light disabled:bg-emerald-primary/60 text-white text-xs font-bold tracking-widest uppercase rounded shadow transition-all duration-300 flex items-center justify-center gap-2"
                     >
-                      {isPending ? 'Verifying...' : 'Verify & Log In'}
+                      {isLoading ? 'Verifying...' : 'Verify & Log In'}
                     </button>
 
                     <button
