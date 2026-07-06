@@ -62,7 +62,7 @@ def parse_whatsapp_payload(raw_text, image_paths, vendor_name="Jaipur_Vendor"):
             listing_price,
             fabric,
             category,
-            "S,M,L,XL,XXL",
+            "S;M;L;XL;XXL",
             image_str,
             "Draft"
         ])
