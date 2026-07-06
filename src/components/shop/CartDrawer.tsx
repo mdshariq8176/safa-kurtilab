@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from '@/hooks/useCart';
-import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingBag, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -163,11 +163,27 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   </div>
                 </div>
 
-                <Link href="/checkout" onClick={onClose} className="block w-full">
-                  <button className="w-full py-3.5 bg-emerald-primary hover:bg-emerald-light text-white text-sm font-medium tracking-widest uppercase transition-all rounded shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                    Proceed to Checkout
-                  </button>
-                </Link>
+                {/* MOQ Validation warning or Checkout button */}
+                {!(itemCount >= 5 || cartTotal >= 5000) ? (
+                  <div className="space-y-3">
+                    <div className="p-3.5 bg-red-50 border border-red-100 rounded-lg text-[11px] leading-relaxed text-red-600 font-semibold text-center space-y-1">
+                      <p className="uppercase tracking-widest text-[9px] text-red-700 font-bold flex items-center justify-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5" /> B2B Wholesale MOQ Alert
+                      </p>
+                      <p>Checkout requires at least <strong>5 items</strong> OR a minimum subtotal of <strong>₹5,000</strong>.</p>
+                      <p className="text-[10px] text-red-500 font-medium">Current: {itemCount} items / Subtotal: ₹{cartTotal.toLocaleString('en-IN')}</p>
+                    </div>
+                    <button className="w-full py-3.5 bg-charcoal/10 border border-charcoal/5 text-charcoal/40 text-sm font-medium tracking-widest uppercase rounded cursor-not-allowed flex items-center justify-center gap-2">
+                      Proceed to Checkout
+                    </button>
+                  </div>
+                ) : (
+                  <Link href="/checkout" onClick={onClose} className="block w-full">
+                    <button className="w-full py-3.5 bg-emerald-primary hover:bg-emerald-light text-white text-sm font-medium tracking-widest uppercase transition-all rounded shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                      Proceed to Checkout
+                    </button>
+                  </Link>
+                )}
                 <button
                   onClick={onClose}
                   className="w-full text-center text-xs font-semibold text-gold-dark hover:underline tracking-wider uppercase"
