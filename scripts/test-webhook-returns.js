@@ -98,6 +98,16 @@ async function runTest() {
     console.log(`Updated Order Delivery Status: "${updatedOrder.deliveryStatus}" (Expected: "RETURNED")`);
     console.log(`Updated Stock Level: ${updatedVariant.stock} units (Expected: ${initialStock + itemQty} units)`);
 
+    if (updatedOrder.invoiceData) {
+      try {
+        const invoiceObj = JSON.parse(updatedOrder.invoiceData);
+        console.log(`Updated RTO Routing Path: "${invoiceObj.rtoRoutingPath}"`);
+        console.log(`Delhivery Printable Label Generated (HTML preview length): ${invoiceObj.printableLabel ? invoiceObj.printableLabel.length : 0} characters`);
+      } catch (e) {
+        console.error('❌ Failed to parse invoiceData JSON:', e.message);
+      }
+    }
+
     if (updatedOrder.deliveryStatus === 'RETURNED' && updatedVariant.stock === (initialStock + itemQty)) {
       console.log('🎉 Integration Test Succeeded! Inventory reverse sync transitions completed successfully.');
     } else {

@@ -26,16 +26,17 @@ model User {
 }
 
 model Product {
-  id          String     @id @default(cuid())
-  title       String
-  slug        String     @unique
-  description String
-  basePrice   Float
-  discount    Float      @default(0) // Percentage
-  images      String     // Stored as a comma-separated list or JSON string for cross-database compatibility (SQLite/Postgres)
-  category    String     // Anarkali, A-Line, Straight Cut, etc.
-  variants    Variant[]  // Stock mapping to sizes and colors
-  createdAt   DateTime   @default(now())
+  id                  String     @id @default(cuid())
+  title               String
+  slug                String     @unique
+  description         String
+  basePrice           Float
+  discount            Float      @default(0) // Percentage
+  images              String     // Stored as a comma-separated list or JSON string for cross-database compatibility (SQLite/Postgres)
+  category            String     // Anarkali, A-Line, Straight Cut, etc.
+  manufacturerAddress String?    // Factory/Supplier location for B2B reverse logistics (RTO routing)
+  variants            Variant[]  // Stock mapping to sizes and colors
+  createdAt           DateTime   @default(now())
 }
 
 model Variant {

@@ -12,6 +12,61 @@ interface WebhookItem {
 }
 
 /**
+ * Delhivery B2B white-label logistics helper.
+ * Overwrites Sender/Origin details with Chennai Office, maps Pickup/Warehouse to product supplier address,
+ * and dynamically sets the RTO destination back to the factory node on returns.
+ */
+function generateDelhiveryB2BLabel(
+  order: {
+    trackingId?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    user?: { name?: string | null } | null;
+  },
+  manufacturerAddress: string,
+  isRTO: boolean
+) {
+  const pickupLocation = manufacturerAddress || 'Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
+  const rtoAddress = isRTO ? pickupLocation : 'Safa Kurtilab, Chennai Office';
+
+  return `
+    <div style="font-family: Arial, sans-serif; width: 400px; border: 2px dashed #000; padding: 15px; margin: 10px auto; background-color: #fff; color: #000; font-size: 11px; line-height: 1.4;">
+      <div style="text-align: center; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px;">
+        DELHIVERY B2B SHIPPING LABEL ${isRTO ? '(RTO REDIRECTED)' : ''}
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <div>
+          <strong>Sender/Origin:</strong><br/>
+          Safa Kurtilab, Chennai Office<br/>
+          Nungambakkam, Chennai, 600006
+        </div>
+        <div style="text-align: right;">
+          <strong>Pickup/Warehouse Location:</strong><br/>
+          ${pickupLocation}
+        </div>
+      </div>
+      <div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0; margin: 5px 0; font-weight: bold;">
+        Tracking ID / AWB: ${order.trackingId || 'DELHIVERY_MOCK_AWB_9921827'}
+      </div>
+      <div>
+        <strong>Ship To (Destination):</strong><br/>
+        ${order.user?.name || 'Client'}<br/>
+        ${order.address || 'Address N/A'}, ${order.city || ''}, ${order.state || ''} - ${order.pincode || ''}
+      </div>
+      <div style="margin-top: 8px; padding-top: 5px; border-top: 1px dashed #ccc;">
+        <strong>Return-To-Origin (RTO) Path:</strong><br/>
+        ${rtoAddress}
+      </div>
+      <div style="margin-top: 10px; font-size: 9px; color: #555; text-align: center; border-top: 1px solid #eee; padding-top: 5px;">
+        Delhivery White-Label B2B Logistics Routing Core v2.0
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Handles incoming webhook callbacks from Delhivery / Shiprocket logistics APIs.
  * Automatically updates order delivery states, triggers inventory re-adjustments,
  * and emails updates via Resend API.
@@ -63,12 +118,43 @@ export async function POST(request: Request) {
       }
     }
 
+    // Extract items to parse manufacturer/factory coordinates
+    const items: WebhookItem[] = JSON.parse(order.items);
+    let manufacturerAddress = 'Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
+    
+    if (items.length > 0) {
+      const dbProduct = await prisma.product.findUnique({
+        where: { id: items[0].id },
+      });
+      if (dbProduct && dbProduct.manufacturerAddress) {
+        manufacturerAddress = dbProduct.manufacturerAddress;
+      }
+    }
+
+    // Ingest invoiceData details with the white-labeled print layout and RTO path redirects
+    let invoiceJson: { printableLabel?: string; rtoRoutingPath?: string; [key: string]: unknown } = {};
+    if (order.invoiceData) {
+      try {
+        invoiceJson = JSON.parse(order.invoiceData) as Record<string, unknown>;
+      } catch {
+        invoiceJson = {};
+      }
+    }
+
+    const isRTO = newDeliveryStatus === 'RETURNED';
+    invoiceJson.printableLabel = generateDelhiveryB2BLabel(order, manufacturerAddress, isRTO);
+    if (isRTO) {
+      invoiceJson.rtoRoutingPath = `RTO Cargo Redirected to Supplier: ${manufacturerAddress}`;
+      console.log(`[Logistics Webhook] RTO assigned to supplier factory node: ${manufacturerAddress}`);
+    }
+
     // 2. Perform database transaction to update order state
     await prisma.order.update({
       where: { id: order.id },
       data: {
         deliveryStatus: newDeliveryStatus,
         paymentStatus: paymentStatusUpdate,
+        invoiceData: JSON.stringify(invoiceJson),
       },
     });
 

@@ -12,8 +12,7 @@ const GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
 
 export default function CheckoutPage() {
   const { items, cartTotal, gstAmount, grandTotal, clearCart } = useCart();
-  const totalItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const meetsMOQ = totalItemsCount >= 5 || cartTotal >= 5000;
+  const meetsMOQ = items.length >= 5 || cartTotal >= 5000;
 
   // Contact details form
   const [formData, setFormData] = useState({
@@ -232,13 +231,13 @@ export default function CheckoutPage() {
             <span className="text-[10px] text-red-600 font-bold uppercase tracking-widest">B2B Wholesale MOQ Requirement</span>
             <h2 className="font-serif text-2xl font-bold text-charcoal">Order Constraints Not Met</h2>
             <p className="text-sm text-charcoal/60 leading-relaxed">
-              Maison Safa operates as a B2B wholesale tailor. Checkout requires a minimum of <strong>5 items</strong> (variants/sets) OR a minimum subtotal threshold of <strong>₹5,000</strong>.
+              Maison Safa operates as a B2B wholesale tailor. Checkout requires at least <strong>5 distinct items/variants</strong> OR a minimum subtotal threshold of <strong>₹5,000</strong>.
             </p>
           </div>
           <div className="bg-red-50/50 p-4 rounded-lg border border-red-100 text-xs text-charcoal/80 space-y-1.5 text-left">
             <div className="flex justify-between">
-              <span>Current Item Count:</span>
-              <strong className="text-charcoal">{totalItemsCount} / 5 items</strong>
+              <span>Current Distinct Variants:</span>
+              <strong className="text-charcoal">{items.length} / 5 variants</strong>
             </div>
             <div className="flex justify-between">
               <span>Current Subtotal:</span>
