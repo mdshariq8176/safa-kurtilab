@@ -162,12 +162,14 @@ export default async function HomePage() {
                     <button className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors text-charcoal/40 hover:text-red-500 shadow-sm z-10">
                       <Heart className="w-4.5 h-4.5" />
                     </button>
-                    <Image
-                      src={product.images}
-                      alt={product.title}
-                      fill
-                      className="object-cover group-hover:scale-102 transition-transform duration-500"
-                    />
+                    <Link href={`/products/${product.slug}`}>
+                      <Image
+                        src={product.images}
+                        alt={product.title}
+                        fill
+                        className="object-cover group-hover:scale-102 transition-transform duration-500 cursor-pointer"
+                      />
+                    </Link>
                   </div>
 
                   {/* Text Details */}

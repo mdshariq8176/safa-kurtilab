@@ -45,47 +45,49 @@ async function main() {
 
     const targetSizes = ['S', 'M', 'L', 'XL', 'XXL'];
 
-    for (const item of products) {
-      console.log(`Syncing Product: ${item.name}`);
+    await prisma.$transaction(async (tx) => {
+      for (const item of products) {
+        console.log(`Syncing Product: ${item.name}`);
 
-      // Slugify helper
-      const baseSlug = item.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-');
-      
-      // Add randomness suffix to guarantee unique constraint compliance
-      const uniqueSuffix = Math.floor(1000 + Math.random() * 9000);
-      const slug = `${baseSlug}-${uniqueSuffix}`;
+        // Slugify helper
+        const baseSlug = item.name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        
+        // Add randomness suffix to guarantee unique constraint compliance
+        const uniqueSuffix = Math.floor(1000 + Math.random() * 9000);
+        const slug = `${baseSlug}-${uniqueSuffix}`;
 
-      // 1. Core Product Table Entry
-      const createdProduct = await prisma.product.create({
-        data: {
-          title: item.name,
-          slug: slug,
-          description: item.description,
-          basePrice: Number(item.basePrice),
-          images: item.imageUrl,
-          category: item.category,
-          discount: 0,
-        }
-      });
+        // 1. Core Product Table Entry
+        const createdProduct = await tx.product.create({
+          data: {
+            title: item.name,
+            slug: slug,
+            description: item.description,
+            basePrice: Number(item.basePrice),
+            images: item.imageUrl,
+            category: item.category,
+            discount: 0,
+          }
+        });
 
-      // 2. Size Variant Auto-Generation (S to XXL)
-      const variantPayload = targetSizes.map(size => ({
-        productId: createdProduct.id,
-        size: size,
-        color: item.color || 'Default',
-        stock: Number(item.stockPerSize),
-      }));
+        // 2. Size Variant Auto-Generation (S to XXL)
+        const variantPayload = targetSizes.map(size => ({
+          productId: createdProduct.id,
+          size: size,
+          color: item.color || 'Default',
+          stock: Number(item.stockPerSize),
+        }));
 
-      await prisma.variant.createMany({
-        data: variantPayload
-      });
+        await tx.variant.createMany({
+          data: variantPayload
+        });
 
-      console.log(`  └─ ✅ Product created with slug '${slug}' and 5 size variants (S-XXL) bound successfully.`);
-    }
+        console.log(`  └─ ✅ Product created with slug '${slug}' and 5 size variants (S-XXL) bound successfully.`);
+      }
+    });
 
     console.log('🎉 Supabase inventory sync operation completed without errors!');
   } catch (error) {

@@ -146,7 +146,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     className="group bg-white border border-gold-primary/10 rounded-xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full animate-slide-up"
                   >
                     {/* Image Container */}
-                    <div className="relative w-full h-[320px] bg-alabaster flex items-center justify-center overflow-hidden border-b border-gold-primary/5">
+                    <Link
+                      href={`/products/${product.slug}`}
+                      className="relative block w-full h-[320px] bg-alabaster overflow-hidden border-b border-gold-primary/5 cursor-pointer"
+                    >
                       {hasDiscount && (
                         <span className="absolute top-4 left-4 bg-emerald-primary text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-widest rounded z-10">
                           {product.discount}% Off
@@ -158,7 +161,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         fill
                         className="object-cover group-hover:scale-102 transition-transform duration-500"
                       />
-                    </div>
+                    </Link>
 
                     {/* Product Metadata */}
                     <div className="p-5 flex-1 flex flex-col justify-between">
