@@ -105,8 +105,12 @@ export async function POST() {
 
     // 4. Write updated statuses back to the CSV file to prevent double ingestion
     if (importCount > 0) {
-      await fs.writeFile(CSV_FILE, updatedLines.join('\n') + '\n', 'utf-8');
-      console.log(`[B2B Ingestion API] Ingested ${importCount} new products. CSV statuses updated to 'Published'.`);
+      try {
+        await fs.writeFile(CSV_FILE, updatedLines.join('\n') + '\n', 'utf-8');
+        console.log(`[B2B Ingestion API] Ingested ${importCount} new products. CSV statuses updated to 'Published'.`);
+      } catch (writeError) {
+        console.warn('[B2B Ingestion API] Non-fatal warning: Could not write back to CSV file (expected in read-only Vercel environments):', writeError);
+      }
     }
 
     return NextResponse.json({
