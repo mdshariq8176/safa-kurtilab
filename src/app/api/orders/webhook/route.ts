@@ -126,8 +126,15 @@ export async function POST(request: Request) {
       const dbProduct = await prisma.product.findUnique({
         where: { id: items[0].id },
       });
-      if (dbProduct && dbProduct.manufacturerAddress) {
-        manufacturerAddress = dbProduct.manufacturerAddress;
+      if (dbProduct) {
+        // Map pickup/warehouse locations dynamically based on product category metadata
+        if (dbProduct.category && dbProduct.category.toLowerCase() === 'anarkali') {
+          manufacturerAddress = 'Surat Weaving Unit, Phase 2, Surat, Gujarat, 395003';
+        } else if (dbProduct.category && dbProduct.category.toLowerCase() === 'straight cut') {
+          manufacturerAddress = 'Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
+        } else {
+          manufacturerAddress = 'Delhi Design Studio Warehouse, Shahpur Jat, New Delhi, 110049';
+        }
       }
     }
 
