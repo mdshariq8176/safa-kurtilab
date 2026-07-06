@@ -29,7 +29,7 @@ function generateDelhiveryB2BLabel(
   isRTO: boolean
 ) {
   const pickupLocation = manufacturerAddress || 'Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
-  const rtoAddress = isRTO ? pickupLocation : 'Safa Kurtilab, Chennai Office';
+  const rtoAddress = isRTO ? pickupLocation : 'Safa Kurtilab, Vill-Hareknagar Mollabari, P.O. Hareknagar, P.S. Beldanga, District: Murshidabad, West Bengal - 742133';
 
   return `
     <div style="font-family: Arial, sans-serif; width: 400px; border: 2px dashed #000; padding: 15px; margin: 10px auto; background-color: #fff; color: #000; font-size: 11px; line-height: 1.4;">
@@ -39,8 +39,10 @@ function generateDelhiveryB2BLabel(
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
         <div>
           <strong>Sender/Origin:</strong><br/>
-          Safa Kurtilab, Chennai Office<br/>
-          Nungambakkam, Chennai, 600006
+          Safa Kurtilab<br/>
+          Vill-Hareknagar Mollabari, P.O. Hareknagar,<br/>
+          P.S. Beldanga, Dist: Murshidabad,<br/>
+          West Bengal - 742133
         </div>
         <div style="text-align: right;">
           <strong>Pickup/Warehouse Location:</strong><br/>

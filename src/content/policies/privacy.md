@@ -26,4 +26,4 @@ For fulfillment, we share limited customer detail arrays with authorized logisti
 * **Payment Processing**: Sensitive transaction data is securely processed via accredited gateway links (such as Razorpay/Cashfree) over tokenized HTTPS sockets. Safa Kurtilab does not store card numbers or banking passwords on our local database.
 
 ### 4. GDPR & CCPA Data Protection Rights
-You have the right to request access to your records, correction of inaccuracies, or complete deletion of your customer profile from our Supabase tables. To invoke these rights, please contact our support team at concierge@safakurtilab.com.
+You have the right to request access to your records, correction of inaccuracies, or complete deletion of your customer profile from our Supabase tables. To invoke these rights, please contact our support team at mdshariq8176@gmai.com.

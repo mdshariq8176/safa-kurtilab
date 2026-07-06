@@ -147,15 +147,15 @@ export default function Footer() {
           <ul className="space-y-3 text-xs text-white/70">
             <li className="flex items-start gap-2.5">
               <MapPin className="w-4 h-4 text-gold-primary flex-shrink-0 mt-0.5" />
-              <span>Plot 28, Shahpur Jat Design District, New Delhi, 110049, India</span>
+              <span>Vill-Hareknagar Mollabari, P.O. Hareknagar, P.S. Beldanga, District: Murshidabad, West Bengal - 742133</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-gold-primary flex-shrink-0" />
-              <span>+91 98765 43210</span>
+              <span>+91 70035 18485</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Mail className="w-4 h-4 text-gold-primary flex-shrink-0" />
-              <span>concierge@safakurtilab.com</span>
+              <span>mdshariq8176@gmai.com</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Globe className="w-4 h-4 text-gold-primary flex-shrink-0" />

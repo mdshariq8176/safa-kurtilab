@@ -7,7 +7,7 @@ By accessing this website, we assume you accept these terms and conditions in fu
 ---
 
 ### 1. General Agreement & Business Entity
-Safa Kurtilab is a premium ethnic wear design studio operating from **Plot 28, Shahpur Jat Design District, New Delhi, 110049, India**. All products, design catalog items, invoicing, and logistics operations are managed under the legal registered business name **Safa Kurtilab**.
+Safa Kurtilab is a premium ethnic wear design studio operating from **Vill-Hareknagar Mollabari, P.O. Hareknagar, P.S. Beldanga, District: Murshidabad, West Bengal - 742133**. All products, design catalog items, invoicing, and logistics operations are managed under the legal registered business name **Safa Kurtilab**.
 
 ### 2. User Accounts & Client Information
 When buying garments, registering on our portal, or providing details for B2B billing (such as B2B corporate GSTIN or Company Name):
@@ -23,4 +23,4 @@ When buying garments, registering on our portal, or providing details for B2B bi
 Any B2B buyer claiming Input Tax Credit (ITC) must supply a valid GSTIN and registered company name at the time of purchase. Once the invoice and shipping manifests are generated through our automatic webhook logistics scheduler, tax values cannot be retroactively altered.
 
 ### 5. Governing Law & Jurisdiction
-These Terms and Conditions shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising in connection with these terms, orders, or transactions shall be subject to the exclusive jurisdiction of the competent courts in **New Delhi, India** only.
+These Terms and Conditions shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising in connection with these terms, orders, or transactions shall be subject to the exclusive jurisdiction of the competent courts in **West Bengal, India** only.
