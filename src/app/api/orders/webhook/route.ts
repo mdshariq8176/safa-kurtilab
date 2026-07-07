@@ -130,8 +130,8 @@ export async function POST(request: Request) {
       });
       if (dbProduct) {
         // Extract original vendor from description (e.g. "Listed under vendor Chavi_Creations.")
-        const vendorMatch = dbProduct.description.match(/Listed under vendor (\w+)/);
-        const originalVendor = vendorMatch ? vendorMatch[1] : 'Safa_Couture';
+        const vendorMatch = dbProduct.description.match(/Listed under vendor ([\w\s_-]+?)\./);
+        const originalVendor = vendorMatch ? vendorMatch[1].trim() : 'Safa_Couture';
         const category = (dbProduct.category || '').toLowerCase();
 
         console.log(`[Logistics Webhook] Routing order for product vendor: "${originalVendor}" and category: "${category}"`);
@@ -148,6 +148,8 @@ export async function POST(request: Request) {
           } else {
             manufacturerAddress = 'Maaesa Creations Jaipur Block, Sitapura Industrial Area, Jaipur, Rajasthan, 302022';
           }
+        } else if (originalVendor === 'Jaipur_Ethnic' || originalVendor === 'Jaipur Ethnic') {
+          manufacturerAddress = 'JAIPUR ETHNIC, DUSHYANTT BHALLA, 2nd Floor, 4/164 SFS, Above Tirupati Textiles, Mansarovar Industrial Area, Jaipur, Rajasthan, 302020';
         } else {
           // Fallback to default Safa Couture warehouses
           if (category === 'anarkali') {
