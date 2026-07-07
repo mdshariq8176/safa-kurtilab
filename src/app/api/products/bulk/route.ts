@@ -40,8 +40,7 @@ export async function POST() {
 
       const rawTitle = cols[0];
       const title = rawTitle.replace(/Chavi Creations/g, 'Safa Couture').replace(/Chavi/g, 'Safa').replace(/Chhabi/g, 'Safa');
-      const rawVendor = cols[1];
-      const vendor = rawVendor.replace(/Chavi_Creations/g, 'Safa_Couture').replace(/Chavi/g, 'Safa').replace(/Chhabi/g, 'Safa');
+      const vendor = cols[1];
       const baseRate = parseFloat(cols[2]);
       const listingPrice = parseFloat(cols[3]);
       const fabric = cols[4];

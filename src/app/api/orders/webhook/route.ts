@@ -122,20 +122,41 @@ export async function POST(request: Request) {
 
     // Extract items to parse manufacturer/factory coordinates
     const items: WebhookItem[] = JSON.parse(order.items);
-    let manufacturerAddress = 'Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
+    let manufacturerAddress = 'Safa Design Studio Warehouse, Shahpur Jat, New Delhi, 110049';
     
     if (items.length > 0) {
       const dbProduct = await prisma.product.findUnique({
         where: { id: items[0].id },
       });
       if (dbProduct) {
-        // Map pickup/warehouse locations dynamically based on product category metadata
-        if (dbProduct.category && dbProduct.category.toLowerCase() === 'anarkali') {
-          manufacturerAddress = 'Surat Weaving Unit, Phase 2, Surat, Gujarat, 395003';
-        } else if (dbProduct.category && dbProduct.category.toLowerCase() === 'straight cut') {
-          manufacturerAddress = 'Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
+        // Extract original vendor from description (e.g. "Listed under vendor Chavi_Creations.")
+        const vendorMatch = dbProduct.description.match(/Listed under vendor (\w+)/);
+        const originalVendor = vendorMatch ? vendorMatch[1] : 'Safa_Couture';
+        const category = (dbProduct.category || '').toLowerCase();
+
+        console.log(`[Logistics Webhook] Routing order for product vendor: "${originalVendor}" and category: "${category}"`);
+
+        if (originalVendor === 'Chavi_Creations') {
+          if (category.includes('cotton') || category.includes('pant')) {
+            manufacturerAddress = 'Chavi Creations Cotton Hub, Plot 110, Sanganer Industrial Area, Jaipur, Rajasthan, 302029';
+          } else {
+            manufacturerAddress = 'Chavi Creations Main Warehouse, Malviya Nagar, Jaipur, Rajasthan, 302017';
+          }
+        } else if (originalVendor === 'Maaesa_Creations') {
+          if (category.includes('plazo') || category.includes('festive')) {
+            manufacturerAddress = 'Maaesa Creations Festive Unit, Phase 3, Surat GIDC, Gujarat, 395003';
+          } else {
+            manufacturerAddress = 'Maaesa Creations Jaipur Block, Sitapura Industrial Area, Jaipur, Rajasthan, 302022';
+          }
         } else {
-          manufacturerAddress = 'Delhi Design Studio Warehouse, Shahpur Jat, New Delhi, 110049';
+          // Fallback to default Safa Couture warehouses
+          if (category === 'anarkali') {
+            manufacturerAddress = 'Safa Surat Weaving Unit, Phase 2, Surat, Gujarat, 395003';
+          } else if (category === 'straight cut') {
+            manufacturerAddress = 'Safa Jaipur Textile Factory, Plot 14, Industrial Area, Jaipur, Rajasthan, 302001';
+          } else {
+            manufacturerAddress = 'Safa Design Studio Warehouse, Shahpur Jat, New Delhi, 110049';
+          }
         }
       }
     }
