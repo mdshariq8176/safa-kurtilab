@@ -39,7 +39,15 @@ export async function GET() {
       });
 
       if (existing) {
-        skipCount++;
+        if (existing.title !== title || existing.description !== description) {
+          await prisma.product.update({
+            where: { id: existing.id },
+            data: { title, description }
+          });
+          insertCount++;
+        } else {
+          skipCount++;
+        }
         continue;
       }
 
