@@ -2,20 +2,19 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { RotateCcw } from 'lucide-react';
+import { COLOR_MAP } from '@/lib/constants';
 
-const CATEGORIES = ['Anarkali', 'Straight Cut', 'A-Line'];
-const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
-const COLORS = [
-  { name: 'Emerald', value: '#044a34' },
-  { name: 'Mustard Gold', value: '#d4af37' },
-  { name: 'Crimson Velvet', value: '#8b0000' },
-];
 const DISCOUNTS = [
   { label: 'Festive Special (Min. 10%)', value: '10' },
   { label: 'Elite Savings (Min. 15%)', value: '15' },
 ];
 
-export default function FilterSidebar() {
+interface FilterSidebarProps {
+  categories: string[];
+  sizes: string[];
+}
+
+export default function FilterSidebar({ categories, sizes }: FilterSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -42,6 +41,17 @@ export default function FilterSidebar() {
 
   const hasFilters = activeCategory || activeSize || activeColor || activeDiscount;
 
+  // Sorting sizes helper
+  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+  const sortedSizes = [...sizes].sort((a, b) => {
+    const isNumA = !isNaN(Number(a));
+    const isNumB = !isNaN(Number(b));
+    if (isNumA && isNumB) return Number(a) - Number(b);
+    if (isNumA) return -1;
+    if (isNumB) return 1;
+    return sizeOrder.indexOf(a) - sizeOrder.indexOf(b);
+  });
+
   return (
     <aside className="w-full md:w-64 flex-shrink-0 space-y-8 bg-white border border-gold-primary/10 rounded-xl p-6 shadow-sm">
       {/* Header */}
@@ -61,7 +71,7 @@ export default function FilterSidebar() {
       <div className="space-y-3">
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider">Silhouettes</h4>
         <div className="space-y-2">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <label key={cat} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
               <input
                 type="checkbox"
@@ -79,7 +89,7 @@ export default function FilterSidebar() {
       <div className="space-y-3">
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider">Sizes</h4>
         <div className="flex flex-wrap gap-2">
-          {SIZES.map((size) => {
+          {sortedSizes.map((size) => {
             const isActive = activeSize === size;
             return (
               <button
@@ -101,14 +111,14 @@ export default function FilterSidebar() {
       {/* Color Filter */}
       <div className="space-y-3">
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider">Colorways</h4>
-        <div className="flex gap-3">
-          {COLORS.map((color) => {
-            const isActive = activeColor === color.name;
+        <div className="flex flex-wrap gap-3">
+          {Object.entries(COLOR_MAP).map(([key, color]) => {
+            const isActive = activeColor === key;
             return (
               <button
-                key={color.name}
-                onClick={() => updateQuery('color', isActive ? null : color.name)}
-                title={color.name}
+                key={key}
+                onClick={() => updateQuery('color', isActive ? null : key)}
+                title={color.label}
                 className={`w-8 h-8 rounded-full border-2 transition-all relative flex items-center justify-center ${
                   isActive ? 'border-emerald-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'
                 }`}

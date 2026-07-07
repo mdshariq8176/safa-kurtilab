@@ -85,18 +85,13 @@ export default function Navbar() {
                       </h4>
                       <ul className="space-y-2 text-xs text-charcoal/70">
                         <li>
-                          <Link href="/products?category=Anarkali" className="hover:text-gold-dark transition-colors block py-0.5">
-                            Anarkali Suits (Royal Flare)
+                          <Link href="/products?category=Kurti Pant Set" className="hover:text-gold-dark transition-colors block py-0.5">
+                            Kurti Pant Sets (Premium Cotton)
                           </Link>
                         </li>
                         <li>
-                          <Link href="/products?category=Straight Cut" className="hover:text-gold-dark transition-colors block py-0.5">
-                            Straight Cut Kurtis (Premium Silk)
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="/products?category=A-Line" className="hover:text-gold-dark transition-colors block py-0.5">
-                            A-Line Formals (Rich Velvet)
+                          <Link href="/products?category=Plazo Suit Set" className="hover:text-gold-dark transition-colors block py-0.5">
+                            Plazo Suit Sets (Festive Wear)
                           </Link>
                         </li>
                         <li>
@@ -211,14 +206,11 @@ export default function Navbar() {
                 <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 border-b border-gold-primary/5">
                   Shop Catalog
                 </Link>
-                <Link href="/products?category=Anarkali" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 border-b border-gold-primary/5 pl-2 text-xs">
-                  - Anarkali Collection
+                <Link href="/products?category=Kurti%20Pant%20Set" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 border-b border-gold-primary/5 pl-2 text-xs">
+                  - Kurti Pant Sets
                 </Link>
-                <Link href="/products?category=Straight%20Cut" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 border-b border-gold-primary/5 pl-2 text-xs">
-                  - Straight Cut Collection
-                </Link>
-                <Link href="/products?category=A-Line" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 border-b border-gold-primary/5 pl-2 text-xs">
-                  - A-Line Velvet Collection
+                <Link href="/products?category=Plazo%20Suit%20Set" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 border-b border-gold-primary/5 pl-2 text-xs">
+                  - Plazo Suit Sets
                 </Link>
                 <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-emerald-primary transition-colors py-2 text-gold-dark font-semibold">
                   Admin Dashboard

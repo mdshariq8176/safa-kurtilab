@@ -32,10 +32,10 @@ export default async function HomePage() {
             </div>
             <h1 className="font-serif text-4xl sm:text-6xl font-bold leading-tight sm:leading-none tracking-wide">
               Intricate Weaves, <br />
-              <span className="text-[#f3d065] italic">Regal Silhouettes</span>
+              <span className="text-[#f3d065] italic">Premium Cottonwear</span>
             </h1>
             <p className="text-sm sm:text-base text-white/80 max-w-lg leading-relaxed font-sans">
-              Discover the art of traditional craftsmanship redefined for the modern connoisseur. Safa Kurtilab brings you pure Banarasi silks, rich velvet textures, and hand-embroidered Anarkali suits.
+              Discover the art of traditional craftsmanship redefined for the modern connoisseur. Safa Kurtilab brings you pure cotton kurtis, premium pant sets, and hand-printed ensembles.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Link href="/products">
@@ -44,9 +44,9 @@ export default async function HomePage() {
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
-              <Link href="/products?category=Anarkali">
+              <Link href="/products?category=Plazo Suit Set">
                 <button className="w-full sm:w-auto px-8 py-4 border border-white/20 hover:border-gold-primary hover:text-gold-primary text-white font-bold text-xs tracking-widest uppercase transition-all duration-300 rounded">
-                  View Anarkalis
+                  View Plazo Suits
                 </button>
               </Link>
             </div>
@@ -56,17 +56,17 @@ export default async function HomePage() {
           <div className="lg:col-span-5 relative flex justify-center">
             <div className="relative w-72 h-[400px] sm:w-80 sm:h-[450px] rounded-2xl overflow-hidden border-2 border-gold-primary/20 shadow-2xl bg-emerald-primary/40 group">
               <Image
-                src="/images/emerald-kurta.png"
-                alt="Luxury Emerald Silk Kurta"
+                src="/images/IMG-20260706-WA0000.jpg"
+                alt="Maroon Paisley Kurti Set"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
                 priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6">
-                <span className="text-xs text-gold-primary uppercase tracking-widest font-semibold">Festive Silhouette</span>
-                <h3 className="font-serif text-lg font-bold text-white mt-1">Emerald Royale Silk Kurta</h3>
-                <Link href="/products/emerald-royale-silk-kurta" className="text-xs text-white/60 hover:text-white underline mt-2 flex items-center gap-1">
-                  View Piece &rarr;
+                <span className="text-xs text-gold-primary uppercase tracking-widest font-semibold">Trending Now</span>
+                <h3 className="font-serif text-lg font-bold text-white mt-1">Maroon Paisley Kurti Set</h3>
+                <Link href="/products?q=Maroon" className="text-xs text-white/60 hover:text-white underline mt-2 flex items-center gap-1">
+                  View Collection &rarr;
                 </Link>
               </div>
             </div>
@@ -78,53 +78,53 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="text-center space-y-2">
           <span className="text-gold-dark font-semibold text-xs tracking-widest uppercase">Meticulous Curation</span>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">Browse by Silhouette</h2>
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">Browse Collections</h2>
           <div className="w-12 h-0.5 bg-gold-primary mx-auto mt-2" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Anarkali */}
-          <Link href="/products?category=Anarkali" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+          {/* Kurti Pant Set */}
+          <Link href="/products?category=Kurti Pant Set" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
             <Image
-              src="/images/mustard-anarkali.png"
-              alt="Anarkali Category"
+              src="/images/IMG-20260706-WA0003.jpg"
+              alt="Kurti Pant Sets"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10">
-              <h3 className="font-serif text-2xl font-semibold tracking-wide">Anarkali Suit Sets</h3>
-              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Royal flares & dupattas</p>
+              <h3 className="font-serif text-2xl font-semibold tracking-wide">Kurti Pant Sets</h3>
+              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Premium Cotton 60x60</p>
             </div>
           </Link>
 
-          {/* Straight Cut */}
-          <Link href="/products?category=Straight Cut" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+          {/* Plazo Suit Set */}
+          <Link href="/products?category=Plazo Suit Set" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
             <Image
-              src="/images/emerald-kurta.png"
-              alt="Straight Cut Category"
+              src="/images/IMG-20260706-WA0001.jpg"
+              alt="Plazo Suit Sets"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10">
-              <h3 className="font-serif text-2xl font-semibold tracking-wide">Straight Cut Kurtas</h3>
-              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Banarasi Silks & Formals</p>
+              <h3 className="font-serif text-2xl font-semibold tracking-wide">Plazo Suit Sets</h3>
+              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Traditional Festive Ensembles</p>
             </div>
           </Link>
 
-          {/* A-Line */}
-          <Link href="/products?category=A-Line" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+          {/* All designs */}
+          <Link href="/products" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
             <Image
-              src="/images/velvet-kurti.png"
-              alt="A-Line Category"
+              src="/images/IMG-20260706-WA0002.jpg"
+              alt="Explore All"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10">
-              <h3 className="font-serif text-2xl font-semibold tracking-wide">A-Line Velvet Tunics</h3>
-              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Plush Winter Luxe</p>
+              <h3 className="font-serif text-2xl font-semibold tracking-wide">Explore All</h3>
+              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Browse Full Luxury Catalog</p>
             </div>
           </Link>
         </div>

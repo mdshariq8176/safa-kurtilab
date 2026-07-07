@@ -47,7 +47,7 @@ export default function Footer() {
             Safa <span className="text-gold-primary">Kurtilab</span>
           </h4>
           <p className="text-xs text-white/60 leading-relaxed">
-            Defining premium ethnic wear since 2012. Handcrafted Kurta and Anarkali suit sets woven from pure fabrics for weddings, festivities, and sophisticated daily wear.
+            Defining premium ethnic wear. Handcrafted Kurti and Plazo suit sets woven from pure fabrics for weddings, festivities, and sophisticated B2B wholesale.
           </p>
           <div className="flex gap-4 text-white/50 text-xs">
             <span>© {new Date().getFullYear()} Safa Kurtilab. All Rights Reserved.</span>
@@ -61,18 +61,13 @@ export default function Footer() {
           </h5>
           <ul className="space-y-2.5 text-xs text-white/70">
             <li>
-              <Link href="/products?category=Anarkali" className="hover:text-gold-primary transition-colors">
-                Anarkali Flare Suit Sets
+              <Link href="/products?category=Kurti Pant Set" className="hover:text-gold-primary transition-colors">
+                Kurti Pant Suit Sets
               </Link>
             </li>
             <li>
-              <Link href="/products?category=Straight Cut" className="hover:text-gold-primary transition-colors">
-                Straight Cut Silk Kurtas
-              </Link>
-            </li>
-            <li>
-              <Link href="/products?category=A-Line" className="hover:text-gold-primary transition-colors">
-                A-Line Velvet Tunics
+              <Link href="/products?category=Plazo Suit Set" className="hover:text-gold-primary transition-colors">
+                Plazo Suit Sets
               </Link>
             </li>
             <li>

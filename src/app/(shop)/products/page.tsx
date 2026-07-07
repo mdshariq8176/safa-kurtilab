@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import FilterSidebar from '@/components/shop/FilterSidebar';
+import { COLOR_MAP } from '@/lib/constants';
 import SortDropdown from '@/components/shop/SortDropdown';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -26,35 +27,58 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   // Build dynamic Prisma database query filters
   const where: Prisma.ProductWhereInput = {};
+  const andConditions: Prisma.ProductWhereInput[] = [];
 
   if (category) {
-    where.category = category;
+    andConditions.push({ category });
   }
 
-  // Filter variants (Size & Color combination)
-  if (size || color) {
-    where.variants = {
-      some: {
-        ...(size && { size }),
-        ...(color && { color }),
-        stock: { gt: 0 }, // only show items with inventory
+  // Filter variants (Size combination)
+  if (size) {
+    andConditions.push({
+      variants: {
+        some: {
+          size,
+          stock: { gt: 0 }, // only show items with inventory
+        },
       },
-    };
+    });
+  }
+
+  // Filter colors dynamically based on title/description keywords
+  if (color && COLOR_MAP[color]) {
+    const keywords = COLOR_MAP[color].keywords;
+    andConditions.push({
+      OR: keywords.map(kw => ({
+        OR: [
+          { title: { contains: kw } },
+          { description: { contains: kw } }
+        ]
+      }))
+    });
   }
 
   // Filter discounts
   if (discount) {
-    where.discount = {
-      gte: parseFloat(discount),
-    };
+    andConditions.push({
+      discount: {
+        gte: parseFloat(discount),
+      },
+    });
   }
 
   // Search queries (case-insensitive title and description matching)
   if (q) {
-    where.OR = [
-      { title: { contains: q } },
-      { description: { contains: q } },
-    ];
+    andConditions.push({
+      OR: [
+        { title: { contains: q } },
+        { description: { contains: q } },
+      ],
+    });
+  }
+
+  if (andConditions.length > 0) {
+    where.AND = andConditions;
   }
 
   // Sorting logic
@@ -67,14 +91,27 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     orderBy = { discount: 'desc' };
   }
 
-  // Fetch results from SQLite database
-  const products = await prisma.product.findMany({
-    where,
-    orderBy,
-    include: {
-      variants: true,
-    },
-  });
+  // Fetch results and dynamic filter options from database
+  const [products, categoriesData, sizesData] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy,
+      include: {
+        variants: true,
+      },
+    }),
+    prisma.product.findMany({
+      select: { category: true },
+      distinct: ['category'],
+    }),
+    prisma.variant.findMany({
+      select: { size: true },
+      distinct: ['size'],
+    }),
+  ]);
+
+  const uniqueCategories = categoriesData.map((c) => c.category).filter(Boolean);
+  const uniqueSizes = sizesData.map((s) => s.size).filter(Boolean);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -116,7 +153,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {/* Main Grid: Sidebar + Products List */}
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}
-        <FilterSidebar />
+        <FilterSidebar categories={uniqueCategories} sizes={uniqueSizes} />
 
         {/* Products Grid */}
         <div className="flex-grow">

@@ -16,7 +16,7 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Safa Kurtilab | Premium Indian Ethnic Wear",
-  description: "Experience the epitome of elegance with Safa Kurtilab. Exquisite silk, velvet, and georgette Kurtis, Anarkalis, and traditional ensembles handcrafted to perfection.",
+  description: "Experience the epitome of elegance with Safa Kurtilab. Exquisite cotton Kurtis, Pant Sets, and traditional ensembles handcrafted to perfection.",
 };
 
 export default function RootLayout({
