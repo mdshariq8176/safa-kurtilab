@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useTransition } from 'react';
 import { ArrowUpDown } from 'lucide-react';
 
 interface SortDropdownProps {
@@ -11,9 +12,10 @@ export default function SortDropdown({ initialSort }: SortDropdownProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="flex items-center gap-2 flex-shrink-0">
+    <div className={`flex items-center gap-2 flex-shrink-0 transition-opacity duration-300 ${isPending ? 'opacity-70 pointer-events-none' : ''}`}>
       <span className="text-xs text-charcoal/60 flex items-center gap-1 font-semibold">
         <ArrowUpDown className="w-3.5 h-3.5" /> Sort By:
       </span>
@@ -28,7 +30,9 @@ export default function SortDropdown({ initialSort }: SortDropdownProps) {
           } else {
             params.set('sort', val);
           }
-          router.push(`${pathname}?${params.toString()}`);
+          startTransition(() => {
+            router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+          });
         }}
       >
         <option value="newest">Newest Arrivals</option>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { COLOR_MAP } from '@/lib/constants';
 
@@ -18,6 +19,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   // Helper to update query parameters
   const updateQuery = (key: string, value: string | null) => {
@@ -27,7 +29,9 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
     } else {
       params.delete(key);
     }
-    router.push(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const activeCategory = searchParams.get('category');
@@ -36,7 +40,9 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
   const activeDiscount = searchParams.get('discount');
 
   const clearAll = () => {
-    router.push(pathname);
+    startTransition(() => {
+      router.replace(pathname, { scroll: false });
+    });
   };
 
   const hasFilters = activeCategory || activeSize || activeColor || activeDiscount;
@@ -53,7 +59,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
   });
 
   return (
-    <aside className="w-full md:w-64 flex-shrink-0 space-y-8 bg-white border border-gold-primary/10 rounded-xl p-6 shadow-sm">
+    <aside className={`w-full md:w-64 flex-shrink-0 space-y-8 bg-white border border-gold-primary/10 rounded-xl p-6 shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-70 pointer-events-none' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gold-primary/10 pb-4">
         <h3 className="font-serif text-lg font-bold text-charcoal">Refine Selection</h3>
