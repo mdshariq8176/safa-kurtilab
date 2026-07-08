@@ -12,7 +12,7 @@ Welcome to **Safa Kurtilab** (Maison Safa). As a dedicated B2B wholesale manufac
 To prevent fraudulent claims and ensure transparent resolutions, all claims for manufacturing defects or shipping damages are subject to the following validation criteria:
 * **Unedited Cargo-Opening Video**: You must record a single, continuous, unedited video of the outer parcel package being opened. 
 * **Details Required in Video**: The video must clearly show the shipping label, the tracking ID bar code, all seals intact before opening, and the immediate extraction and inspection of the defective garment showing the specific flaw.
-* **Submission Deadline**: The video documentation must be submitted to our wholesale liaison team at `mdshariq8176@gmai.com` within **48 hours** of delivery. Claims submitted without this unedited video or past the 48-hour window will be summarily rejected.
+* **Submission Deadline**: The video documentation must be submitted to our wholesale liaison team at `mdshariq8176@gmail.com` within **48 hours** of delivery. Claims submitted without this unedited video or past the 48-hour window will be summarily rejected.
 
 ### 3. Dynamic RTO (Return to Origin) Routing
 * In the event of a verified defect claim, our system will issue an automated Return to Origin (RTO) shipping label.

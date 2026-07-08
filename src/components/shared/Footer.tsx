@@ -150,7 +150,7 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-2.5">
               <Mail className="w-4 h-4 text-gold-primary flex-shrink-0" />
-              <span>mdshariq8176@gmai.com</span>
+              <span>mdshariq8176@gmail.com</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Globe className="w-4 h-4 text-gold-primary flex-shrink-0" />

@@ -47,9 +47,12 @@ d:\Website\
 ├── scripts/
 │   ├── bulk-import.ts                  # Local node pipeline to import products.json items
 │   ├── csv-import.ts                   # Ingest products.csv draft items and auto-create variants (Prisma)
+│   ├── email-outreach.py               # Robust multi-recipient SMTP proposal campaign dispatch agent
 │   ├── generate-catalog.py             # Python script generating 50 products using Unsplash resources
-│   ├── get-links.py                    # Generates pre-encoded B2B WhatsApp API redirect links
-│   ├── indiamart-check.py              # Playwright Chrome session supplier crawler
+│   ├── get-links.py                    # Generates B2B WhatsApp API redirect links
+│   ├── indiamart-check.py              # Playwright Chrome supplier crawler with CSV database exporter
+│   ├── indiamart_manufacturers.csv     # Extracted IndiaMart manufacturer details database
+│   ├── send-gmail-outreach.py          # Automates Gmail web UI outreach using Chrome Profile 2 active session
 │   ├── test-live-order.js              # Inter-state webhook transaction tester
 │   ├── urls.txt                        # UTF-8 text file storing generated WhatsApp links
 │   ├── upload-images.js                # Cloudinary image uploader script
@@ -417,13 +420,35 @@ Generates Delhivery printable B2B shipping labels and handles automated category
 ---
 
 ### 4.14. IndiaMART Playwright Chrome Session Supplier Crawler (`scripts/indiamart-check.py`)
-Queries verified supplier nodes securely utilizing logged-in local Google Chrome user profiles.
+Queries verified supplier nodes securely utilizing local Google Chrome user profiles and exports results to a structured CSV file.
 * **Mechanics**:
-  1. Spawns Chromium using `launch_persistent_context` referencing the native Windows user profile path `~\AppData\Local\Google\Chrome\User Data`.
+  1. Spawns Chromium using `launch_persistent_context` referencing an isolated profile directory (`d:\Website\.chrome_profile_indiamart`) to avoid process singleton lock errors if the user's primary browser is already open.
   2. Bypasses Cloudflare firewalls and bot detection rules using `--disable-blink-features=AutomationControlled` headers.
-  3. Queries target listing search pages in headed mode, simulating real user behavior (idle timings).
-  4. Scrapes and logs verified business parameters (`company_name`, `contact_node`) safely into console logs.
-  5. Built using CP1252-safe ASCII markers (`[FETCH]`, `[OK]`, `[ERROR]`) to prevent terminal character map encoding crashes on Windows.
+  3. Queries 25 target wholesale supplier search pages in headless mode, simulating real user behavior with 4-second timing delays.
+  4. Scrapes verified business parameters (`company_name`, `contact_node`) and writes them directly to `scripts/indiamart_manufacturers.csv`.
+  5. Built using Windows asyncio `WindowsProactorEventLoopPolicy` loop rules to prevent execution crashes during browser process initialization.
+
+---
+
+### 4.16. Automated B2B Email Outreach Campaign Agent (`scripts/email-outreach.py`)
+Dispatches customized B2B partnership proposal pitches directly to vendor/buyer mailing lists via secure SMTP relay channels.
+* **Mechanics**:
+  1. Reads SMTP user/password parameters directly from the `.env` configuration file, running a local mock simulation if credentials are not provided.
+  2. Parses the verified B2B proposal message dynamically from `pitch_message.txt` with UTF-8 character map safety.
+  3. Implements email format syntax validation (`is_valid_email`) to filter bad recipients.
+  4. Configures a robust **15-second connection timeout** and **2-attempt retry loop** to survive network latency drops.
+  5. Executes a **5-second anti-spam delay** between multiple recipient dispatches to bypass bulk-sending rate limits on personal Gmail accounts.
+
+---
+
+### 4.17. Chrome Profile 2 Gmail Outreach Automation (`scripts/send-gmail-outreach.py`)
+Launches the user's active, pre-authenticated Google Chrome session to send B2B proposal pitches directly via the Gmail web interface without requiring SMTP keys.
+* **Mechanics**:
+  1. Spawns Chrome in headed mode using `launch_persistent_context` pointing to Profile 2: `~\AppData\Local\Google\Chrome\User Data --profile-directory="Profile 2"`.
+  2. Navigates directly to `https://mail.google.com/`, waiting for the active session inbox to resolve.
+  3. Locates and clicks the Gmail "Compose" button, handles input field mappings for To (`mdshariq2357@gmail.com`), Subject, and Body (pitch message contents).
+  4. Dispatches the email directly through the web UI by clicking the "Send" button and waiting for the sent notification.
+  5. Gracefully handles ProcessSingleton profile lock exceptions if the user already has Chrome Profile 2 open.
 
 ---
 
