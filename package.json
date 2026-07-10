@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --turbopack",
+    "build": "node scripts/vercel-prebuild.js && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "bulk-import": "ts-node scripts/bulk-import.ts"

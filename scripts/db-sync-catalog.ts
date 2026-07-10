@@ -1,6 +1,4 @@
 // scripts/db-sync-catalog.ts
-process.env.DATABASE_URL = "postgresql://postgres.mbgzoflqfnxxohzuwqmd:SafaKurtilabDB_2026!@aws-1-ap-south-1.pooler.supabase.com:5432/postgres";
-
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs/promises';
 import * as path from 'path';

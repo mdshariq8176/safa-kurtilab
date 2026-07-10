@@ -44,3 +44,8 @@ next-env.d.ts
 .env*
 
 /SKU/
+
+# SQLite local databases
+*.db
+*.db-journal
+

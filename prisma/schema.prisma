@@ -2,7 +2,7 @@
 // Optimized for local development with SQLite and easily switchable to PostgreSQL for production.
 
 datasource db {
-  provider = "postgresql" // Switched to postgresql for production cloud deployment
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

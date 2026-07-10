@@ -488,33 +488,30 @@ cmd /c npm run lint
 cmd /c npm run build
 ```
 
-### 5.3. Setting Database Engine for Local Development (SQLite)
-1. Verify [prisma/schema.prisma](file:///d:/Website/prisma/schema.prisma#L4-L7) database datasource block provider is set to `"sqlite"`.
-2. Verify [.env](file:///d:/Website/.env#L5-L6) has `DATABASE_URL="file:./dev.db"` uncommented, and the PostgreSQL remote string commented out.
-3. Run schema generation, migration, and seeder commands:
+### 5.3. Local Development Database Engine (SQLite & Dynamic Build Hook)
+To prevent localhost scripts from accidentally writing, modifying, or deleting live production data, the project is configured to use a strictly isolated environment:
+1. **Local Isolation:** The [.env](file:///d:/Website/.env) file maps `DATABASE_URL="file:./dev.db"`. The schema provider in [prisma/schema.prisma](file:///d:/Website/prisma/schema.prisma) is set to `"sqlite"`.
+2. **Automated Vercel Prebuild Hook:** You no longer need to manually toggle the provider in `schema.prisma` before committing or deploying. We have introduced [scripts/vercel-prebuild.js](file:///d:/Website/scripts/vercel-prebuild.js), which is automatically triggered by Vercel during the build step:
+   * It dynamically switches the provider block in `schema.prisma` from `"sqlite"` to `"postgresql"`.
+   * It compiles the Prisma client with PostgreSQL drivers to connect to your live Supabase cloud database.
+3. **Execution Script Security:** All utility scripts in [scripts/](file:///d:/Website/scripts/) (like `db-sync-catalog.ts` and `get_users.js`) have had their hardcoded production credentials removed. They strictly read connection details from the environment variable (`DATABASE_URL`), ensuring they can never connect to your live Supabase instance during local execution.
+
+To setup or reinitialize your local environment:
+```bash
+# Push schema structure to local SQLite database (dev.db)
+npx prisma db push
+
+# Seed local SQLite database with catalog products
+npx ts-node scripts/db-sync-catalog.ts
+```
+
+### 5.4. Syncing Schema Changes to Production (Supabase)
+When schema adjustments are made to `schema.prisma` that need to be synchronized with your live Supabase cloud instance:
+1. Temporarily edit the database provider in [schema.prisma](file:///d:/Website/prisma/schema.prisma) to `"postgresql"`.
+2. Temporarily set `DATABASE_URL` in `.env` to the live Supabase connection pooler string:
+   `postgresql://postgres.mbgzoflqfnxxohzuwqmd:SafaKurtilabDB_2026!@aws-1-ap-south-1.pooler.supabase.com:5432/postgres`
+3. Run the schema sync command:
    ```bash
-   # Recompile Prisma schema types
-   cmd /c npx prisma generate
-
-   # Synchronize schema structure with dev.db
-   cmd /c npx prisma db push
-
-   # Seed catalog products and accounts
-   cmd /c node prisma/seed.js
+   npx prisma db push
    ```
-
-### 5.4. Syncing Schema Changes with PostgreSQL (Supabase)
-To apply schema adjustments to the remote PostgreSQL host:
-1. Revert [schema.prisma](file:///d:/Website/prisma/schema.prisma) database provider block to:
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
-   ```
-2. Edit `.env` to comment out SQLite and uncomment the `postgresql://` connection pooler string.
-3. Run:
-   ```bash
-   cmd /c npx prisma generate
-   cmd /c npx prisma db push
-   ```
+4. Revert `schema.prisma` back to `"sqlite"` and `.env` back to `"file:./dev.db"` to maintain localhost database isolation.
