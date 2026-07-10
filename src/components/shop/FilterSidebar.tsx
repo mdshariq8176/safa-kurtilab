@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useTransition } from 'react';
+import { useTransition, useState, useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { COLOR_MAP } from '@/lib/constants';
 
@@ -21,8 +21,28 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  // Local state for instant visual feedback on click
+  const [localCategory, setLocalCategory] = useState<string | null>(searchParams.get('category'));
+  const [localSize, setLocalSize] = useState<string | null>(searchParams.get('size'));
+  const [localColor, setLocalColor] = useState<string | null>(searchParams.get('color'));
+  const [localDiscount, setLocalDiscount] = useState<string | null>(searchParams.get('discount'));
+
+  // Keep local state in sync when searchParams change (e.g. back button, page load)
+  useEffect(() => {
+    setLocalCategory(searchParams.get('category'));
+    setLocalSize(searchParams.get('size'));
+    setLocalColor(searchParams.get('color'));
+    setLocalDiscount(searchParams.get('discount'));
+  }, [searchParams]);
+
   // Helper to update query parameters
   const updateQuery = (key: string, value: string | null) => {
+    // Instantly update local state to avoid latency perception
+    if (key === 'category') setLocalCategory(value);
+    if (key === 'size') setLocalSize(value);
+    if (key === 'color') setLocalColor(value);
+    if (key === 'discount') setLocalDiscount(value);
+
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
       params.set(key, value);
@@ -34,18 +54,17 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
     });
   };
 
-  const activeCategory = searchParams.get('category');
-  const activeSize = searchParams.get('size');
-  const activeColor = searchParams.get('color');
-  const activeDiscount = searchParams.get('discount');
-
   const clearAll = () => {
+    setLocalCategory(null);
+    setLocalSize(null);
+    setLocalColor(null);
+    setLocalDiscount(null);
     startTransition(() => {
       router.replace(pathname, { scroll: false });
     });
   };
 
-  const hasFilters = activeCategory || activeSize || activeColor || activeDiscount;
+  const hasFilters = localCategory || localSize || localColor || localDiscount;
 
   // Sorting sizes helper
   const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -59,7 +78,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
   });
 
   return (
-    <aside className={`w-full md:w-64 flex-shrink-0 space-y-8 bg-white border border-gold-primary/10 rounded-xl p-6 shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-70 pointer-events-none' : ''}`}>
+    <aside className={`w-full md:w-64 flex-shrink-0 space-y-8 bg-white border border-gold-primary/10 rounded-xl p-6 shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-95' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gold-primary/10 pb-4">
         <h3 className="font-serif text-lg font-bold text-charcoal">Refine Selection</h3>
@@ -81,7 +100,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
             <label key={cat} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
               <input
                 type="checkbox"
-                checked={activeCategory === cat}
+                checked={localCategory === cat}
                 onChange={(e) => updateQuery('category', e.target.checked ? cat : null)}
                 className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
               />
@@ -96,7 +115,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider">Sizes</h4>
         <div className="flex flex-wrap gap-2">
           {sortedSizes.map((size) => {
-            const isActive = activeSize === size;
+            const isActive = localSize === size;
             return (
               <button
                 key={size}
@@ -119,7 +138,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider">Colorways</h4>
         <div className="flex flex-wrap gap-3">
           {Object.entries(COLOR_MAP).map(([key, color]) => {
-            const isActive = activeColor === key;
+            const isActive = localColor === key;
             return (
               <button
                 key={key}
@@ -151,7 +170,7 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
               <input
                 type="radio"
                 name="discount-group"
-                checked={activeDiscount === discount.value}
+                checked={localDiscount === discount.value}
                 onChange={() => updateQuery('discount', discount.value)}
                 className="w-4 h-4 text-emerald-primary focus:ring-emerald-primary border-gold-primary/30"
               />

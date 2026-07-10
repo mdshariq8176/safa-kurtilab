@@ -15,7 +15,7 @@ export default function SortDropdown({ initialSort }: SortDropdownProps) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className={`flex items-center gap-2 flex-shrink-0 transition-opacity duration-300 ${isPending ? 'opacity-70 pointer-events-none' : ''}`}>
+    <div className={`flex items-center gap-2 flex-shrink-0 transition-opacity duration-300 ${isPending ? 'opacity-95' : ''}`}>
       <span className="text-xs text-charcoal/60 flex items-center gap-1 font-semibold">
         <ArrowUpDown className="w-3.5 h-3.5" /> Sort By:
       </span>
