@@ -52,64 +52,98 @@ def extract_pdf_page_as_image(pdf_path, dpi=150):
     doc.close()
     return img
 
-def inpaint_corners_local(img):
+def inpaint_entire_margins(img):
     """
-    Applies brand-neutral inpainting to remove corner logos/watermarks.
-    Optimized: Inpaints crops of the ROIs locally and pastes them back,
-    making it 50x faster on high-res images.
+    Applies brand-neutral inpainting to remove text/logos from the entire outer margin areas,
+    preventing any cropping or distortion of the original image frame.
     """
     h, w, c = img.shape
-    
-    margin_top = int(h * 0.15)
-    margin_bottom = int(h * 0.12)
-    margin_left = int(w * 0.20)
-    margin_right = int(w * 0.32)
-    
-    rois = [
-        (0, margin_top, 0, margin_left),  # Top-Left
-        (0, margin_top, w - margin_right, w),  # Top-Right
-        (h - margin_bottom, h, 0, margin_left),  # Bottom-Left
-        (h - margin_bottom, h, w - int(w * 0.20), w)  # Bottom-Right
-    ]
-    
     out_img = img.copy()
     
+    # Define outer boundary margins (Top 18%, Bottom 15%, Left 24%, Right 24%)
+    margin_top = int(h * 0.18)
+    margin_bottom = int(h * 0.15)
+    margin_left = int(w * 0.24)
+    margin_right = int(w * 0.24)
+    
+    rois = [
+        (0, margin_top, 0, w),                      # Top margin
+        (h - margin_bottom, h, 0, w),                # Bottom margin
+        (margin_top, h - margin_bottom, 0, margin_left), # Left margin
+        (margin_top, h - margin_bottom, w - margin_right, w) # Right margin
+    ]
+    
     for ymin, ymax, xmin, xmax in rois:
+        if ymin >= ymax or xmin >= xmax:
+            continue
+            
         roi = img[ymin:ymax, xmin:xmax]
+        roi_h, roi_w, _ = roi.shape
         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
         
-        # 1. Edge detection
+        # 1. Edge detection for text/logos
         edges = cv2.Canny(roi, 30, 150)
-        edge_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
-        dilated_edges = cv2.dilate(edges, edge_kernel, iterations=1)
         
-        # 2. Threshold for white boxes/text
-        _, white_mask = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
-        # Threshold for dark text
-        _, black_mask = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV)
+        # 2. Thresholding for high-contrast white and dark shapes (typical of labels)
+        _, white_mask = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+        _, black_mask = cv2.threshold(gray, 55, 255, cv2.THRESH_BINARY_INV)
         
-        # Combine all masks
-        roi_mask = cv2.bitwise_or(dilated_edges, white_mask)
-        roi_mask = cv2.bitwise_or(roi_mask, black_mask)
+        # Combine masks
+        mask = cv2.bitwise_or(edges, white_mask)
+        mask = cv2.bitwise_or(mask, black_mask)
         
-        # Clean noise
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        roi_mask = cv2.morphologyEx(roi_mask, cv2.MORPH_CLOSE, kernel)
+        # Dilate mask to group characters into blocks
+        group_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 5))
+        mask_grouped = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, group_kernel)
         
-        # Fill contours to cover solid shape interiors
-        contours, _ = cv2.findContours(roi_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Local mask for inpainting
+        local_inpaint_mask = np.zeros((roi_h, roi_w), dtype=np.uint8)
+        
+        # Find contours of candidate text regions
+        contours, _ = cv2.findContours(mask_grouped, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
         for cnt in contours:
-            if cv2.contourArea(cnt) > 10:
-                cv2.drawContours(roi_mask, [cnt], -1, 255, -1)
+            x, y, cw, ch = cv2.boundingRect(cnt)
+            # Filter: exclude large clothing contours to protect product textures
+            if ch > 2 and cw > 2:
+                if ch < int(h * 0.10) and cw < int(w * 0.35):
+                    cv2.drawContours(local_inpaint_mask, [cnt], -1, 255, -1)
+                    
+        # Dilate final inpaint mask slightly for smooth boundary transitions
+        dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+        local_inpaint_mask = cv2.dilate(local_inpaint_mask, dilate_kernel, iterations=1)
         
-        # Dilate final mask slightly
-        dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
-        roi_mask = cv2.dilate(roi_mask, dilate_kernel, iterations=1)
-        
-        # Inpaint only the cropped ROI locally (highly optimized)
-        inpainted_roi = cv2.inpaint(roi, roi_mask, inpaintRadius=3, flags=cv2.INPAINT_TELEA)
+        # Apply inpaint locally
+        inpainted_roi = cv2.inpaint(roi, local_inpaint_mask, inpaintRadius=3, flags=cv2.INPAINT_TELEA)
         out_img[ymin:ymax, xmin:xmax] = inpainted_roi
         
+    return out_img
+
+def add_corner_watermark(img, watermark_path):
+    """
+    Subtly overlays the SAFA brand emblem as a corner watermark (15% image width, 18% opacity).
+    """
+    h, w, c = img.shape
+    watermark = cv2.imread(watermark_path)
+    if watermark is None:
+        return img
+        
+    # Scale watermark width to 15% of the product image width
+    wm_w = int(w * 0.15)
+    wm_h = int(watermark.shape[0] * (wm_w / watermark.shape[1]))
+    resized_wm = cv2.resize(watermark, (wm_w, wm_h), interpolation=cv2.INTER_AREA)
+    
+    # Position in bottom-right corner with 20px padding
+    padding = 20
+    x = w - wm_w - padding
+    y = h - wm_h - padding
+    
+    # Blend onto BGR image with 18% opacity
+    roi = img[y:y+wm_h, x:x+wm_w]
+    blended = cv2.addWeighted(roi, 0.82, resized_wm, 0.18, 0)
+    
+    out_img = img.copy()
+    out_img[y:y+wm_h, x:x+wm_w] = blended
     return out_img
 
 def process_single_pdf(args):
@@ -148,11 +182,11 @@ def process_single_pdf(args):
     db_image_path = f"/images/catalog/{out_filename}"
     
     try:
-        # Check if already processed to save time on resumes
-        if not os.path.exists(dest_path):
-            img = extract_pdf_page_as_image(filepath, dpi=150)
-            clean_img = inpaint_corners_local(img)
-            cv2.imwrite(dest_path, clean_img, [int(cv2.IMWRITE_JPEG_QUALITY), 92])
+        # Always re-process images from scratch to overwrite poorly processed files
+        img = extract_pdf_page_as_image(filepath, dpi=150)
+        clean_img = inpaint_entire_margins(img)
+        watermarked = add_corner_watermark(clean_img, r"d:\Website\public\images\logo_emblem.png")
+        cv2.imwrite(dest_path, watermarked, [int(cv2.IMWRITE_JPEG_QUALITY), 92])
             
         return {
             'success': True,

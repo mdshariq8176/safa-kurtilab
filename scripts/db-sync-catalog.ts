@@ -20,23 +20,18 @@ async function main() {
     const products = JSON.parse(rawData);
     console.log(`📦 Found ${products.length} products to import in metadata file.`);
 
+    console.log('🗑️ Clearing existing Variant and Product database records...');
+    await prisma.variant.deleteMany({});
+    await prisma.product.deleteMany({});
+
     const targetSizes = ['S', 'M', 'L', 'XL', 'XXL'];
     let importCount = 0;
 
-    console.log('🚀 Starting ingestion of new products (robust sequential mode)...');
+    console.log('🚀 Starting Ingestion of new products (robust sequential mode)...');
     
     for (let i = 0; i < products.length; i++) {
       const item = products[i];
       try {
-        // Check if product with this title already exists in the database
-        const existing = await prisma.product.findFirst({
-          where: { title: item.title }
-        });
-
-        if (existing) {
-          continue;
-        }
-
         // Create unique slug
         const baseSlug = item.title
           .toLowerCase()

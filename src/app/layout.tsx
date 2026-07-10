@@ -27,9 +27,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfair.variable} ${jakarta.variable} font-sans bg-[#fbfbf9] text-[#111827] antialiased min-h-screen flex flex-col`}
+        className={`${playfair.variable} ${jakarta.variable} font-sans bg-[#fbfbf9] text-[#111827] antialiased min-h-screen flex flex-col relative`}
       >
-        {children}
+        {/* Subtle global background watermark */}
+        <div 
+          className="pointer-events-none fixed inset-0 z-0 opacity-[0.015] bg-center bg-no-repeat bg-contain"
+          style={{ backgroundImage: 'url("/images/logo_emblem.png")', backgroundSize: '40%' }}
+        />
+        <div className="relative z-10 flex flex-col min-h-screen flex-grow">
+          {children}
+        </div>
       </body>
     </html>
   );

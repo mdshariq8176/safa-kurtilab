@@ -43,9 +43,16 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
         {/* Brand Column */}
         <div className="space-y-4">
-          <h4 className="font-serif text-2xl font-bold tracking-widest uppercase">
-            Safa <span className="text-gold-primary">Kurtilab</span>
-          </h4>
+          <div className="flex items-center gap-2">
+            <img 
+              src="/images/logo_emblem.png" 
+              alt="Safa Emblem" 
+              className="w-8 h-8 object-contain" 
+            />
+            <h4 className="font-serif text-xl font-bold tracking-widest uppercase">
+              Safa <span className="text-gold-primary">Kurtilab</span>
+            </h4>
+          </div>
           <p className="text-xs text-white/60 leading-relaxed">
             Defining premium ethnic wear. Handcrafted Kurti and Plazo suit sets woven from pure fabrics for weddings, festivities, and sophisticated B2B wholesale.
           </p>
