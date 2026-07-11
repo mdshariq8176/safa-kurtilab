@@ -15,6 +15,7 @@ interface ProductsPageProps {
     discount?: string;
     sort?: string;
     q?: string;
+    page?: string;
   }>;
 }
 
@@ -23,7 +24,22 @@ export const revalidate = 0; // Ensures database changes show up instantly on fi
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
-  const { category, size, color, discount, sort, q } = await searchParams;
+  const { category, size, color, discount, sort, q, page } = await searchParams;
+
+  // Pagination Configuration
+  const pageNum = Number(page) || 1;
+  const limit = 24;
+  const skip = (pageNum - 1) * limit;
+
+  // Active query parameters (to preserve filters when paginating)
+  const resolvedParams = {
+    ...(category && { category }),
+    ...(size && { size }),
+    ...(color && { color }),
+    ...(discount && { discount }),
+    ...(sort && { sort }),
+    ...(q && { q }),
+  };
 
   // Build dynamic Prisma database query filters
   const where: Prisma.ProductWhereInput = {};
@@ -92,13 +108,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   // Fetch results and dynamic filter options from database
-  const [products, categoriesData, sizesData] = await Promise.all([
+  const [products, totalCount, categoriesData, sizesData] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy,
+      skip,
+      take: limit,
       include: {
         variants: true,
       },
+    }),
+    prisma.product.count({
+      where,
     }),
     prisma.product.findMany({
       select: { category: true },
@@ -112,6 +133,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const uniqueCategories = categoriesData.map((c) => c.category).filter(Boolean);
   const uniqueSizes = sizesData.map((s) => s.size).filter(Boolean);
+  const totalPages = Math.ceil(totalCount / limit);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -143,6 +165,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {color && <input type="hidden" name="color" value={color} />}
             {discount && <input type="hidden" name="discount" value={discount} />}
             {sort && <input type="hidden" name="sort" value={sort} />}
+            {page && <input type="hidden" name="page" value={page} />}
           </form>
 
           {/* Sorting Dropdown (Client Component for interactivity) */}
@@ -171,74 +194,116 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => {
-                const discountAmt = product.basePrice * (product.discount / 100);
-                const salePrice = product.basePrice - discountAmt;
-                const hasDiscount = product.discount > 0;
+            <div className="space-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {products.map((product) => {
+                  const discountAmt = product.basePrice * (product.discount / 100);
+                  const salePrice = product.basePrice - discountAmt;
+                  const hasDiscount = product.discount > 0;
 
-                return (
-                  <div
-                    key={product.id}
-                    className="group bg-white border border-gold-primary/10 rounded-xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full animate-slide-up"
-                  >
-                    {/* Image Container */}
-                    <Link
-                      href={`/products/${product.slug}`}
-                      className="relative block w-full h-[320px] bg-alabaster overflow-hidden border-b border-gold-primary/5 cursor-pointer"
+                  return (
+                    <div
+                      key={product.id}
+                      className="group bg-white border border-gold-primary/10 rounded-xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full animate-slide-up"
                     >
-                      {hasDiscount && (
-                        <span className="absolute top-4 left-4 bg-emerald-primary text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-widest rounded z-10">
-                          {product.discount}% Off
-                        </span>
-                      )}
-                      <Image
-                        src={product.images}
-                        alt={product.title}
-                        fill
-                        className="object-cover group-hover:scale-102 transition-transform duration-500"
-                      />
-                    </Link>
-
-                    {/* Product Metadata */}
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div>
-                        <span className="text-[10px] text-gold-dark font-bold uppercase tracking-widest">
-                          {product.category}
-                        </span>
-                        <h3 className="font-serif text-base font-semibold text-charcoal mt-1 group-hover:text-emerald-primary transition-colors line-clamp-1">
-                          {product.title}
-                        </h3>
-                        <div className="flex gap-2 items-center text-xs mt-1">
-                          <div className="flex text-amber-500">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 fill-current" />
-                            ))}
-                          </div>
-                          <span className="text-charcoal/40 font-medium">(4.9)</span>
-                        </div>
-                      </div>
-
-                      {/* Pricing and Action */}
-                      <div className="flex items-center justify-between mt-5 pt-3 border-t border-gold-primary/5">
-                        <div className="flex flex-col">
-                          {hasDiscount && (
-                            <span className="text-xs text-charcoal/40 line-through">₹{product.basePrice}</span>
-                          )}
-                          <span className="text-sm font-bold text-emerald-primary">
-                            ₹{salePrice.toLocaleString('en-IN')}
+                      {/* Image Container */}
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="relative block w-full h-[320px] bg-alabaster overflow-hidden border-b border-gold-primary/5 cursor-pointer"
+                      >
+                        {hasDiscount && (
+                          <span className="absolute top-4 left-4 bg-emerald-primary text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-widest rounded z-10">
+                            {product.discount}% Off
                           </span>
+                        )}
+                        <Image
+                          src={product.images}
+                          alt={product.title}
+                          fill
+                          className="object-cover group-hover:scale-102 transition-transform duration-500"
+                        />
+                      </Link>
+
+                      {/* Product Metadata */}
+                      <div className="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] text-gold-dark font-bold uppercase tracking-widest">
+                            {product.category}
+                          </span>
+                          <h3 className="font-serif text-base font-semibold text-charcoal mt-1 group-hover:text-emerald-primary transition-colors line-clamp-1">
+                            {product.title}
+                          </h3>
+                          <div className="flex gap-2 items-center text-xs mt-1">
+                            <div className="flex text-amber-500">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="w-3 h-3 fill-current" />
+                              ))}
+                            </div>
+                            <span className="text-charcoal/40 font-medium">(4.9)</span>
+                          </div>
                         </div>
-                        <Link href={`/products/${product.slug}`}>
-                          <button className="px-4 py-2 bg-emerald-primary hover:bg-emerald-light text-white text-xs font-semibold tracking-wider uppercase rounded transition-colors flex items-center gap-1.5">
-                            <ShoppingBag className="w-3.5 h-3.5" /> Details
-                          </button>
-                        </Link>
+
+                        {/* Pricing and Action */}
+                        <div className="flex items-center justify-between mt-5 pt-3 border-t border-gold-primary/5">
+                          <div className="flex flex-col">
+                            {hasDiscount && (
+                              <span className="text-xs text-charcoal/40 line-through">₹{product.basePrice}</span>
+                            )}
+                            <span className="text-sm font-bold text-emerald-primary">
+                              ₹{salePrice.toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                          <Link href={`/products/${product.slug}`}>
+                            <button className="px-4 py-2 bg-emerald-primary hover:bg-emerald-light text-white text-xs font-semibold tracking-wider uppercase rounded transition-colors flex items-center gap-1.5">
+                              <ShoppingBag className="w-3.5 h-3.5" /> Details
+                            </button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-6 pt-8 border-t border-gold-primary/10">
+                  {/* Previous Button */}
+                  <Link
+                    href={{
+                      pathname: '/products',
+                      query: { ...resolvedParams, page: String(pageNum - 1) },
+                    }}
+                    className={`px-5 py-2.5 border border-gold-primary/20 rounded text-xs font-bold uppercase tracking-widest transition-colors ${
+                      pageNum <= 1 
+                        ? 'pointer-events-none opacity-40 text-charcoal/40 bg-gray-50' 
+                        : 'text-charcoal hover:bg-gold-primary/5 hover:border-gold-primary/40 bg-white shadow-sm'
+                    }`}
+                  >
+                    Previous
+                  </Link>
+
+                  {/* Page Status */}
+                  <span className="text-xs font-bold tracking-wider text-charcoal/60 uppercase">
+                    Page {pageNum} of {totalPages}
+                  </span>
+
+                  {/* Next Button */}
+                  <Link
+                    href={{
+                      pathname: '/products',
+                      query: { ...resolvedParams, page: String(pageNum + 1) },
+                    }}
+                    className={`px-5 py-2.5 border border-gold-primary/20 rounded text-xs font-bold uppercase tracking-widest transition-colors ${
+                      pageNum >= totalPages 
+                        ? 'pointer-events-none opacity-40 text-charcoal/40 bg-gray-50' 
+                        : 'text-charcoal hover:bg-gold-primary/5 hover:border-gold-primary/40 bg-white shadow-sm'
+                    }`}
+                  >
+                    Next
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
