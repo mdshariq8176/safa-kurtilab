@@ -32,7 +32,7 @@ export default function RootLayout({
         {/* Subtle global background watermark */}
         <div 
           className="pointer-events-none fixed inset-0 z-0 opacity-[0.015] bg-center bg-no-repeat bg-contain"
-          style={{ backgroundImage: 'url("/images/logo_emblem.png")', backgroundSize: '40%' }}
+          style={{ backgroundImage: 'url("/images/logo.jpg")', backgroundSize: '40%' }}
         />
         <div className="relative z-10 flex flex-col min-h-screen flex-grow">
           {children}

@@ -45,9 +45,9 @@ export default function Footer() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <img 
-              src="/images/logo_emblem.png" 
-              alt="Safa Emblem" 
-              className="w-8 h-8 object-contain" 
+              src="/images/logo.jpg" 
+              alt="Safa Logo" 
+              className="w-8 h-8 object-contain rounded" 
             />
             <h4 className="font-serif text-xl font-bold tracking-widest uppercase">
               Safa <span className="text-gold-primary">Kurtilab</span>
