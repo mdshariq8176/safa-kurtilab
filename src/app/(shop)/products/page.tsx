@@ -20,7 +20,7 @@ interface ProductsPageProps {
   }>;
 }
 
-export const revalidate = 30; // ISR: serve cached catalog page instantly, revalidate in background every 30s
+export const revalidate = 30; // ISR fallback
 
 // Cache filter categories and sizes for 1 hour to prevent redundant DB hits on every request
 const getCachedFilterOptions = unstable_cache(
@@ -44,13 +44,33 @@ const getCachedFilterOptions = unstable_cache(
   { revalidate: 3600 }
 );
 
-// Cache total count of unfiltered products for 5 minutes
-const getCachedTotalCount = unstable_cache(
-  async () => {
-    return prisma.product.count();
+// Cache dynamic product queries for 60 seconds using serialized keys
+const getCachedProducts = unstable_cache(
+  async (serializedWhere: string, serializedOrderBy: string, skip: number, limit: number) => {
+    const where = JSON.parse(serializedWhere);
+    const orderBy = JSON.parse(serializedOrderBy);
+    return prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        variants: true,
+      },
+    });
   },
-  ['catalog-total-count'],
-  { revalidate: 300 }
+  ['catalog-products-data'],
+  { revalidate: 60 }
+);
+
+// Cache dynamic counts for 60 seconds using serialized keys
+const getCachedCount = unstable_cache(
+  async (serializedWhere: string) => {
+    const where = JSON.parse(serializedWhere);
+    return prisma.product.count({ where });
+  },
+  ['catalog-products-count'],
+  { revalidate: 60 }
 );
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
@@ -138,20 +158,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     orderBy = { discount: 'desc' };
   }
 
-  const isFiltered = category || size || color || discount || q;
+  const serializedWhere = JSON.stringify(where);
+  const serializedOrderBy = JSON.stringify(orderBy);
 
   // Fetch results and cached filter options in parallel
   const [products, totalCount, filterOptions] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-      include: {
-        variants: true,
-      },
-    }),
-    isFiltered ? prisma.product.count({ where }) : getCachedTotalCount(),
+    getCachedProducts(serializedWhere, serializedOrderBy, skip, limit),
+    getCachedCount(serializedWhere),
     getCachedFilterOptions(),
   ]);
 
