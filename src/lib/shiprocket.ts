@@ -46,7 +46,7 @@ export async function bookShiprocketPickup(
   console.log(`[Shiprocket B2B API] Packing ${items.reduce((sum, i) => sum + i.quantity, 0)} garments.`);
 
   // 1. Simulate remote HTTP request latency
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  await new Promise((resolve) => setTimeout(resolve, 100));
 
   // 2. Generate mock tracking references
   const trackingNumber = `SR${Math.floor(1000000000 + Math.random() * 9000000000)}`;

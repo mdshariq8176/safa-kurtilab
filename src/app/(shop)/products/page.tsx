@@ -19,8 +19,7 @@ interface ProductsPageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Ensures database changes show up instantly on filter updates
+export const revalidate = 30; // ISR: serve cached catalog page instantly, revalidate in background every 30s
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params

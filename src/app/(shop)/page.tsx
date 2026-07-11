@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import { ArrowRight, Star, ShoppingBag, Sparkles, Heart } from 'lucide-react';
 
-export const revalidate = 0; // Disable caching to fetch real-time stock levels
+export const revalidate = 60; // ISR: serve cached page instantly, revalidate featured products every 60s
 
 export default async function HomePage() {
   // Fetch trending products directly from the database

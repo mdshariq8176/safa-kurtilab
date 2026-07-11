@@ -28,7 +28,7 @@ class MockSupabaseAuth {
   async signInWithOtp({ email, phone }: { email?: string; phone?: string }) {
     console.log(`[Mock Supabase Auth] Requested OTP for: ${email || phone}`);
     // Simulate API delay
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 100));
     return { data: { message: 'OTP code sent' }, error: null };
   }
 
@@ -40,7 +40,7 @@ class MockSupabaseAuth {
   }) {
     const { email, phone, token } = params;
     console.log(`[Mock Supabase Auth] Verifying OTP: ${token} for: ${email || phone}`);
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 100));
 
     if (token !== '123456' && token.length !== 6) {
       return { data: { session: null }, error: new Error('Invalid 6-digit OTP code.') };
