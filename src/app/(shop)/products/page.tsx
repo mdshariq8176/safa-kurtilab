@@ -81,7 +81,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   // Pagination Configuration
   const pageNum = Number(page) || 1;
-  const limit = 24;
+  const limit = 12;
   const skip = (pageNum - 1) * limit;
 
   // Active query parameters (to preserve filters when paginating)
