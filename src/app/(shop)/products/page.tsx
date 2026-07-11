@@ -6,6 +6,7 @@ import SortDropdown from '@/components/shop/SortDropdown';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Star, ShoppingBag, Sparkles, Search } from 'lucide-react';
+import { unstable_cache } from 'next/cache';
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -20,6 +21,37 @@ interface ProductsPageProps {
 }
 
 export const revalidate = 30; // ISR: serve cached catalog page instantly, revalidate in background every 30s
+
+// Cache filter categories and sizes for 1 hour to prevent redundant DB hits on every request
+const getCachedFilterOptions = unstable_cache(
+  async () => {
+    const [categoriesData, sizesData] = await Promise.all([
+      prisma.product.findMany({
+        select: { category: true },
+        distinct: ['category'],
+      }),
+      prisma.variant.findMany({
+        select: { size: true },
+        distinct: ['size'],
+      }),
+    ]);
+    return {
+      categories: categoriesData.map((c) => c.category).filter(Boolean),
+      sizes: sizesData.map((s) => s.size).filter(Boolean),
+    };
+  },
+  ['catalog-filter-options'],
+  { revalidate: 3600 }
+);
+
+// Cache total count of unfiltered products for 5 minutes
+const getCachedTotalCount = unstable_cache(
+  async () => {
+    return prisma.product.count();
+  },
+  ['catalog-total-count'],
+  { revalidate: 300 }
+);
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
@@ -106,8 +138,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     orderBy = { discount: 'desc' };
   }
 
-  // Fetch results and dynamic filter options from database
-  const [products, totalCount, categoriesData, sizesData] = await Promise.all([
+  const isFiltered = category || size || color || discount || q;
+
+  // Fetch results and cached filter options in parallel
+  const [products, totalCount, filterOptions] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy,
@@ -117,21 +151,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         variants: true,
       },
     }),
-    prisma.product.count({
-      where,
-    }),
-    prisma.product.findMany({
-      select: { category: true },
-      distinct: ['category'],
-    }),
-    prisma.variant.findMany({
-      select: { size: true },
-      distinct: ['size'],
-    }),
+    isFiltered ? prisma.product.count({ where }) : getCachedTotalCount(),
+    getCachedFilterOptions(),
   ]);
 
-  const uniqueCategories = categoriesData.map((c) => c.category).filter(Boolean);
-  const uniqueSizes = sizesData.map((s) => s.size).filter(Boolean);
+  const uniqueCategories = filterOptions.categories;
+  const uniqueSizes = filterOptions.sizes;
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
