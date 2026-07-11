@@ -49,3 +49,19 @@ next-env.d.ts
 *.db
 *.db-journal
 
+# Chrome profiles & local logs
+.chrome_profile/
+.chrome_profile_indiamart/
+/price_watcher.log
+/scratch/
+
+# Raw drive images directory
+/raw_drive_images/
+
+# Temporary test images and PDFs in scripts
+/scripts/*.png
+/scripts/temp_*.pdf
+
+# Python cache files
+__pycache__/
+*.pyc

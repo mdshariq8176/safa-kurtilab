@@ -430,6 +430,20 @@ Queries verified supplier nodes securely utilizing local Google Chrome user prof
 
 ---
 
+### 4.15. WhatsApp Parser & Bulk Database Ingestion Pipeline
+Automates importing raw WhatsApp B2B text/image arrays into Prisma database tables.
+* **Mechanics**:
+  1. **Python Parser (`scripts/whatsapp_parser.py`)**:
+     * Extracts base rates (e.g., `Rate 695+gst`), computes wholesale listing prices with 5% GST markup, parses fabrics/categories, and formats Cloudinary mockup URLs.
+     * Appends rows to `src/data/products.csv` using a semicolon separated format for sizes (`S;M;L;XL;XXL`) and images to prevent CSV column splitting conflicts.
+  2. **Bulk Ingestion API Route (`POST /api/products/bulk`)**:
+     * Parses `src/data/products.csv` directly, ingests entries flagged with status `"Draft"`, automatically registers corresponding S-XXL size variants, and commits updates to Supabase inside transaction blocks.
+     * Automatically overwrites the CSV status of ingested rows to `"Published"` on disk to prevent double ingestion.
+  3. **Local CLI Importer (`scripts/csv-import.ts`)**:
+     * Provides a console-based fallback using tsx to directly trigger transaction-safe database ingestion from `src/data/products.csv`.
+
+---
+
 ### 4.16. Automated B2B Email Outreach Campaign Agent (`scripts/email-outreach.py`)
 Dispatches customized B2B partnership proposal pitches directly to vendor/buyer mailing lists via secure SMTP relay channels.
 * **Mechanics**:
@@ -452,17 +466,54 @@ Launches the user's active, pre-authenticated Google Chrome session to send B2B 
 
 ---
 
-### 4.15. WhatsApp Parser & Bulk Database Ingestion Pipeline
-Automates importing raw WhatsApp B2B text/image arrays into Prisma database tables.
+### 4.18. Advanced Precise CV Image Processing & Branding Pipeline (`scripts/process-and-brand.py`)
+Executes parallel high-precision Computer Vision (CV) operations to classify layouts, clear supplier markings, and apply unified corporate branding.
+* **Mechanics & Architecture**:
+  1. **Dynamic Layout Classification**:
+     * Classifies each extracted image dynamically into one of four formats: `On-Model`, `Flat-Lay / Floor Lay`, `Hanger Shot`, or `Detail Close-Up`.
+     * Heuristics analyze filename keywords, center-region HSV Indian skin-tone masks (`H: 0-22, S: 25-160, V: 60-255`), and edge density profiles in the top 15% center area (detecting hangers/hooks).
+  2. **High-Precision Segmentation Masking**:
+     * Targets margin boundaries (top, bottom, left, right) adjusted dynamically based on the layout classification.
+     * Combines Canny edge outlines (thresholds: 30, 150) with white threshold regions (`gray > 200`) and dark text zones (`gray < 55`) to construct localized segmentation masks.
+     * Cleans up segments using a rectangular morphological structuring element (`9x5` kernel) to group adjacent text nodes while filtering out fabric contours to avoid structural garment warping.
+  3. **Frequency Separation Inpainting**:
+     * Splits image ROIs into low-frequency (background color/shading via Gaussian blur) and high-frequency (texture details) bands.
+     * Inpaints the low-frequency component using Fast Marching Methods (Telea algorithm, 5px radius).
+     * Synthesizes texture noise for the high-frequency channel by calculating the standard deviation of surrounding non-masked details, then blending back into the canvas.
+  4. **Localized Unsharp Mask Sharpening**:
+     * Sharpens the inpainted boundaries (`sharpened = 1.6 * inpainted - 0.6 * blurred`) to preserve fabric details.
+  5. **Auto-Branding Overlay**:
+     * Embeds the gold Safa tulip emblem (`public/images/logo_emblem.png`) as a 15% width corner watermark with 35% opacity blending.
+  6. **Parallel Metadata Compilation**:
+     * Runs asynchronously using `ProcessPoolExecutor` to process multi-page PDFs concurrently.
+     * Identifies garment pricing from filename prefixes, parses fabric composition (Cotton, Rayon, Roman Silk), and generates `scripts/products_to_import.json` for ingestion.
+
+---
+
+### 4.19. SKU Local Inpainting and Google Drive Catalog Retrieval (`scripts/process_skus_and_catalog.py`)
+Processes local print catalog layouts and links cloud storage assets with direct HTTP stream downloads.
 * **Mechanics**:
-  1. **Python Parser (`scripts/whatsapp_parser.py`)**:
-     * Extracts base rates (e.g., `Rate 695+gst`), computes wholesale listing prices with 5% GST markup, parses fabrics/categories, and formats Cloudinary mockup URLs.
-     * Appends rows to `src/data/products.csv` using a semicolon separated format for sizes (`S;M;L;XL;XXL`) and images to prevent CSV column splitting conflicts.
-  2. **Bulk Ingestion API Route (`POST /api/products/bulk`)**:
-     * Parses `src/data/products.csv` directly, ingests entries flagged with status `"Draft"`, automatically registers corresponding S-XXL size variants, and commits updates to Supabase inside transaction blocks.
-     * Automatically overwrites the CSV status of ingested rows to `"Published"` on disk to prevent double ingestion.
-  3. **Local CLI Importer (`scripts/csv-import.ts`)**:
-     * Provides a console-based fallback using tsx to directly trigger transaction-safe database ingestion from `src/data/products.csv`.
+  1. **Brand-Aware Layout Boundaries**:
+     * Isolates corner regions based on SKU product code formats (`ajmera_left` for BRN-/AAC-/LSY- prefixes, `ajmera_right` for NAG-, and `kesaria` for Drive files) to prevent general body canvas distortion.
+  2. **Google Drive API Direct Download & Bypass**:
+     * Fetches listings from Google Drive folders and caches file lists locally (`scripts/drive_files_list.json`) to prevent API throttling.
+     * Bypasses `gdown` restriction walls by requesting download links directly using custom User-Agents (`requests.get("https://drive.google.com/uc?export=download&id={id}")`), writing binary streams to disk, and cleaning up temp files.
+  3. **DPI Rasterization**:
+     * Converts PDF catalog pages into high-resolution BGR images at 300 DPI using PyMuPDF (`fitz`) before processing.
+
+---
+
+### 4.20. B2B Competitive Price Watcher (`scripts/price-watcher.py`)
+Monitors market values from competing wholesale channels to suggest competitive pricing points.
+* **Mechanics**:
+  1. **HTML Parsing Engine**:
+     * Extracts pricing listings from raw HTML crawls using BeautifulSoup. Falls back to pre-compiled regex pattern groups if `beautifulsoup4` is not installed locally.
+  2. **Optimal Price Recommendation Matrix**:
+     * Computes the mathematical mean of competitor listings.
+     * Deducts a B2B wholesale discount threshold (5% target) to guarantee market competitiveness.
+     * Incorporates a standard Rs. 150 logistics/shipping buffer to determine final catalog pricing.
+     * Saves analytical data to `price_watcher.log` for automated audits.
+
 
 ---
 
