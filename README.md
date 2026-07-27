@@ -172,3 +172,11 @@ Parses product properties and inserts items + 5 automatic size variants (S to XX
   npm run bulk-import
   ```
 
+---
+
+## 🔒 Security & Deployment Maintenance
+
+* **Git Authentication**: Updated repository remote origin to standard secure HTTPS (`https://github.com/mdshariq8176/safa-kurtilab.git`) via Git Credential Manager, replacing hardcoded expiring PAT tokens.
+* **Vercel Production Deployment**: Deployed live on Vercel Serverless ([https://safa-kurtilab-bivv.vercel.app/](https://safa-kurtilab-bivv.vercel.app/)).
+
+
