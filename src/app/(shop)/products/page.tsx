@@ -255,8 +255,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   const b2bSetPrice = product.b2bSetPrice || product.basePrice;
                   const perPiece = product.perPiecePrice || (b2bSetPrice / 4);
                   const msrp = product.msrpRetailPrice || Math.round(perPiece * 2.2);
-                  const rawMargin = Math.round(((msrp - perPiece) / perPiece) * 100);
-                  const marginDisplay = rawMargin > 200 ? '2.2x Markup (120% Margin)' : `${rawMargin}% Margin`;
 
                   // Map Hub Location Labels dynamically
                   let hubLabel = 'Jaipur Hub';
@@ -284,9 +282,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           📍 {hubLabel}
                         </span>
 
-                        {/* Retailer Markup Badge */}
-                        <span className="absolute bottom-3 right-3 bg-gold-primary text-charcoal font-bold text-[9px] px-2 py-0.5 uppercase tracking-wider rounded z-10 shadow">
-                          🔥 {marginDisplay}
+                        {/* Wholesale Set Badge */}
+                        <span className="absolute bottom-3 right-3 bg-emerald-dark/90 text-white font-bold text-[9px] px-2.5 py-1 uppercase tracking-wider rounded z-10 shadow border border-gold-primary/30">
+                          ✨ 4-Piece Set Bundle
                         </span>
 
                         <Image
