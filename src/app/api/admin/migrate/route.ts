@@ -39,6 +39,7 @@ const MIGRATION_SQL = `
 
   ALTER TABLE "Variant" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
+  CREATE UNIQUE INDEX IF NOT EXISTS "Variant_productId_size_color_key" ON "Variant"("productId", "size", "color");
   CREATE INDEX IF NOT EXISTS "idx_products_hub_fabric" ON "Product"("hubLocation", "fabricType");
   CREATE INDEX IF NOT EXISTS "idx_products_pattern_cut" ON "Product"("patternCut");
   CREATE INDEX IF NOT EXISTS "idx_products_quality_grade" ON "Product"("qualityGrade");
