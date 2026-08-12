@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const hub = searchParams.get('hub');
     const fabricType = searchParams.get('fabricType');
     const category = searchParams.get('category');
-    const qualityGrade = searchParams.get('qualityGrade');
+    const qualityGrade = searchParams.get('qualityGrade') || searchParams.get('quality');
     const craftTypes = searchParams.get('craftTypes');
     const patternCuts = searchParams.get('patternCuts');
     const minPrice = searchParams.get('minPrice');
@@ -19,8 +19,12 @@ export async function GET(request: Request) {
     const isBestseller = searchParams.get('isBestseller');
     const isNewArrival = searchParams.get('isNewArrival');
     const isHighMargin = searchParams.get('isHighMargin');
-    const search = searchParams.get('search');
+    const search = searchParams.get('search') || searchParams.get('q');
     const sortBy = searchParams.get('sortBy');
+    
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '48');
+    const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {};
 
@@ -91,6 +95,8 @@ export async function GET(request: Request) {
     const products = await prisma.product.findMany({
       where,
       orderBy,
+      take: limit,
+      skip,
       include: {
         variants: true,
       },
