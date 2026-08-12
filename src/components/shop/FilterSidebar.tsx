@@ -18,10 +18,12 @@ const QUALITY_GRADES = [
 ];
 
 const PATTERN_CUTS = [
-  'Anarkali 3-Piece Set',
-  'Alia Cut / Nyra Cut',
-  'Straight Cut 2-Pc Set',
-  'Sharara Set',
+  { label: '👗 Indo-Western Co-ord Sets', value: 'CO_ORD_SET' },
+  { label: '👚 Short Tunics & Tops', value: 'SHORT_TUNIC' },
+  { label: '✂️ Straight Cut Sets', value: 'STRAIGHT_SET' },
+  { label: '💃 Flared Anarkali Sets', value: 'ANARKALI_FLARED' },
+  { label: '👑 Premium Pakistani Long Panel', value: 'PAKISTANI_LONG_PANEL' },
+  { label: '✨ Sharara & Peplum Sets', value: 'SHARARA_SET' },
 ];
 
 interface FilterSidebarProps {
@@ -156,15 +158,15 @@ export default function FilterSidebar({ categories, sizes }: FilterSidebarProps)
         </h4>
         <div className="space-y-2">
           {PATTERN_CUTS.map((cut) => (
-            <label key={cut} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
+            <label key={cut.value} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
               <input
                 type="checkbox"
-                checked={localCut === cut}
-                onChange={(e) => updateQuery('patternCut', e.target.checked ? cut : null)}
+                checked={localCut === cut.value}
+                onChange={(e) => updateQuery('patternCut', e.target.checked ? cut.value : null)}
                 className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
               />
               <span className="group-hover:text-emerald-primary transition-colors text-[11px]">
-                {cut}
+                {cut.label}
               </span>
             </label>
           ))}

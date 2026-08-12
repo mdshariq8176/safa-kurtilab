@@ -258,13 +258,20 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 {products.map((product) => {
                   const b2bSetPrice = product.b2bSetPrice || product.basePrice;
                   const perPiece = product.perPiecePrice || (b2bSetPrice / 4);
-                  const msrp = product.msrpRetailPrice || (perPiece * 2.5);
-                  const marginPct = product.retailerMarginPct || Math.round(((msrp - perPiece) / perPiece) * 100);
+                  const msrp = product.msrpRetailPrice || Math.round(perPiece * 2.2);
+                  const rawMargin = Math.round(((msrp - perPiece) / perPiece) * 100);
+                  const marginDisplay = rawMargin > 200 ? '2.2x Markup (120% Margin)' : `${rawMargin}% Margin`;
 
-                  // Map Hub Location Labels
+                  // Map Hub Location Labels dynamically
                   let hubLabel = 'Jaipur Hub';
-                  if (product.hubLocation === 'GUJARAT_SURAT') hubLabel = 'Surat Hub';
-                  if (product.hubLocation === 'UTTAR_PRADESH_LUCKNOW') hubLabel = 'Lucknow Hub';
+                  const titleLower = (product.title + ' ' + (product.category || '')).toLowerCase();
+                  if (product.hubLocation === 'GUJARAT_SURAT' || titleLower.includes('surat') || titleLower.includes('rayon') || titleLower.includes('sharara') || titleLower.includes('pakistani')) {
+                    hubLabel = 'Surat Hub';
+                  } else if (product.hubLocation === 'UTTAR_PRADESH_LUCKNOW' || titleLower.includes('lucknow') || titleLower.includes('chikankari') || titleLower.includes('modal')) {
+                    hubLabel = 'Lucknow Hub';
+                  } else if (product.hubLocation === 'RAJASTHAN_JAIPUR' || titleLower.includes('jaipur') || titleLower.includes('sanganer') || titleLower.includes('cotton')) {
+                    hubLabel = 'Jaipur Hub';
+                  }
 
                   return (
                     <div
@@ -281,9 +288,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           📍 {hubLabel}
                         </span>
 
-                        {/* Margin Potential Badge */}
+                        {/* Retailer Markup Badge */}
                         <span className="absolute bottom-3 right-3 bg-gold-primary text-charcoal font-bold text-[9px] px-2 py-0.5 uppercase tracking-wider rounded z-10 shadow">
-                          🔥 {marginPct}% Retailer Margin
+                          🔥 {marginDisplay}
                         </span>
 
                         <Image
