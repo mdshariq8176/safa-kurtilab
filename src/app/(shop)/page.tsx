@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import { ArrowRight, Star, ShoppingBag, Sparkles, Heart } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60; // ISR: serve cached page instantly, revalidate featured products every 60s
+// ISR: cache homepage for 5 minutes on Vercel CDN — eliminates cold start on first load
+export const revalidate = 300;
 
 export default async function HomePage() {
   // Fetch trending products directly from the database

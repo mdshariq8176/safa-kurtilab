@@ -71,12 +71,12 @@ export async function GET(request: Request) {
 
     if (search) {
       where.OR = [
-        { title: { contains: search } },
-        { description: { contains: search } },
-        { category: { contains: search } },
-        { fabricType: { contains: search } },
-        { craftTypes: { contains: search } },
-        { patternCut: { contains: search } },
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { category: { contains: search, mode: 'insensitive' } },
+        { fabricType: { contains: search, mode: 'insensitive' } },
+        { craftTypes: { contains: search, mode: 'insensitive' } },
+        { patternCut: { contains: search, mode: 'insensitive' } },
       ];
     }
 

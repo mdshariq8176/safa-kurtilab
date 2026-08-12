@@ -11,24 +11,26 @@ export const metadata: Metadata = {
 export const revalidate = 0; // Fetch fresh live orders and inventory alerts on each reload
 
 export default async function AdminPage() {
-  // 1. Fetch B2B & Individual orders list
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
-
-  // 2. Fetch all products and size/color stock variants
-  const products = await prisma.product.findMany({
-    include: {
-      variants: true,
-    },
-  });
-
-  // 3. Count standard B2B registered users
-  const usersCount = await prisma.user.count({
-    where: {
-      role: 'USER',
-    },
-  });
+  // Run all queries in parallel for speed
+  const [orders, products, usersCount] = await Promise.all([
+    // 1. Recent orders (last 50 only)
+    prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    }),
+    // 2. Latest 100 products only (was loading all 1700+ causing 9s load)
+    prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      include: {
+        variants: true,
+      },
+    }),
+    // 3. Count B2B registered users
+    prisma.user.count({
+      where: { role: 'USER' },
+    }),
+  ]);
 
   return (
     <div className="bg-alabaster">
