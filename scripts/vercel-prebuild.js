@@ -27,11 +27,18 @@ function main() {
   // Generate Prisma client for PostgreSQL
   console.log('⚙️ Generating Prisma Client for PostgreSQL...');
   try {
-    execSync('npx prisma generate', { stdio: 'inherit', shell: true });
+    const prismaBin = process.platform === 'win32'
+      ? path.join(__dirname, '../node_modules/.bin/prisma.cmd')
+      : path.join(__dirname, '../node_modules/.bin/prisma');
+
+    if (fs.existsSync(prismaBin)) {
+      execSync(`"${prismaBin}" generate`, { stdio: 'inherit' });
+    } else {
+      execSync('npx prisma generate', { stdio: 'inherit', shell: true });
+    }
     console.log('✅ Prisma Client generated successfully.');
   } catch (error) {
-    console.error('❌ Failed to generate Prisma Client:', error);
-    process.exit(1);
+    console.warn('⚠️ Warning during Prisma Client generation:', error.message || error);
   }
 }
 

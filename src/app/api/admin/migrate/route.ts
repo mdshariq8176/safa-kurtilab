@@ -142,42 +142,45 @@ export async function POST(request: Request) {
       }
     }
 
-    // Run Full Taxonomy Classifier on ALL products in database
-    const allProducts = await prisma.product.findMany();
-    let classifiedCount = 0;
+    // Run Bulk Fast Taxonomy Classification on ALL products via raw SQL batch
+    const updateSql = `
+      UPDATE "Product" SET 
+        "hubLocation" = CASE 
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'chikankari|lucknow|modal|mukaish' THEN 'UTTAR_PRADESH_LUCKNOW'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'surat|rayon|georgette|organza|sharara|pakistani|foil' THEN 'GUJARAT_SURAT'
+          ELSE 'RAJASTHAN_JAIPUR'
+        END,
+        "industrialCluster" = CASE 
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'chikankari|lucknow|modal|mukaish' THEN 'Chowk'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'surat|rayon|georgette|organza|sharara|pakistani|foil' THEN 'Millennium Market'
+          ELSE 'Sanganer'
+        END,
+        "fabricType" = CASE 
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'pakistani|lawn' THEN 'Pakistani Lawn Cotton'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'rayon|14kg|18kg' THEN 'Rayon'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'modal|silk' THEN 'Modal Silk'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'georgette|fox' THEN 'Georgette'
+          ELSE 'Cotton'
+        END,
+        "patternCut" = CASE 
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'cord|co-ord|coord' THEN 'CO_ORD_SET'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'pakistani' THEN 'PAKISTANI_LONG_PANEL'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'anarkali|flared' THEN 'ANARKALI_FLARED'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'tunic|short kurti|top' THEN 'SHORT_TUNIC'
+          WHEN LOWER(title || ' ' || COALESCE(category,'') || ' ' || COALESCE(description,'')) ~ 'sharara|peplum' THEN 'SHARARA_SET'
+          ELSE 'STRAIGHT_SET'
+        END,
+        "b2bSetPrice" = CASE WHEN "b2bSetPrice" IS NULL OR "b2bSetPrice" = 0 THEN CASE WHEN "basePrice" < 500 THEN "basePrice" * 4 ELSE "basePrice" END ELSE "b2bSetPrice" END;
 
-    for (const product of allProducts) {
-      const cls = classifyProduct(product.title, product.category, product.description);
-      let b2bSetPrice = product.b2bSetPrice;
-      if (!b2bSetPrice || b2bSetPrice === 0) {
-        b2bSetPrice = product.basePrice < 500 ? product.basePrice * 4 : product.basePrice;
-      }
-      const setPcs = product.setPcs || 4;
-      const perPiecePrice = parseFloat((b2bSetPrice / setPcs).toFixed(2));
-      const msrpRetailPrice = product.msrpRetailPrice || Math.round(perPiecePrice * 2.2);
-      const retailerMarginPct = Math.round(((msrpRetailPrice - perPiecePrice) / perPiecePrice) * 100);
+      UPDATE "Product" SET 
+        "perPiecePrice" = ROUND(CAST("b2bSetPrice" / COALESCE("setPcs", 4) AS NUMERIC), 2),
+        "msrpRetailPrice" = COALESCE("msrpRetailPrice", ROUND(CAST(("b2bSetPrice" / COALESCE("setPcs", 4)) * 2.2 AS NUMERIC), 0));
 
-      await prisma.product.update({
-        where: { id: product.id },
-        data: {
-          hubLocation: cls.hubLocation,
-          industrialCluster: cls.industrialCluster,
-          fabricType: cls.fabricType,
-          fabricGrade: cls.fabricGrade,
-          yarnSpecGsm: cls.yarnSpecGsm,
-          qualityGrade: cls.qualityGrade,
-          patternCut: cls.patternCut,
-          topLengthInches: cls.topLengthInches,
-          dupattalengthMeters: cls.dupattalengthMeters,
-          collectionTags: cls.collectionTags,
-          b2bSetPrice,
-          perPiecePrice,
-          msrpRetailPrice,
-          retailerMarginPct,
-        },
-      });
-      classifiedCount++;
-    }
+      UPDATE "Product" SET
+        "retailerMarginPct" = ROUND(CAST((("msrpRetailPrice" - "perPiecePrice") / GREATEST("perPiecePrice", 1)) * 100 AS NUMERIC), 0);
+    `;
+
+    const classifiedCount = await prisma.$executeRawUnsafe(updateSql);
 
     return NextResponse.json({
       success: true,
