@@ -708,5 +708,99 @@ npm start
 * **How It Was Implemented**:
   * Provides a split-screen dashboard with raw text input, hub selector (Jaipur, Surat, Lucknow), live schema mapping preview grid, and atomic Prisma transaction execution.
 
+---
+
+## 🤖 9. Hyper-Automated AI-Driven Vendor Ingestion ETL Pipeline (`scripts/etl_pipeline/`)
+
+### 9.1. Architecture Overview
+The Enterprise AI ETL Pipeline is a modular, multi-factor Python pipeline engineered to process raw vendor Excel catalogs and factory floor photos into production Supabase PostgreSQL tables with zero human effort for valid records.
+
+```mermaid
+graph TD
+    Raw[Raw Excel/CSV Catalog + JPG Images] --> CDC[Module 1: SHA-256 Delta Tracking & CDC Engine]
+    CDC -->|Unchanged Hash| Skip[⚡ Skip Heavy Compute - Cost $0]
+    CDC -->|New/Modified| Grouping[Master SKU & Color Variant Grouping Engine]
+
+    Grouping --> Taxonomy[Module 3: 50 B2B Manufacturing Hub Taxonomy Classifier]
+    Taxonomy -->|JR / SG / LK / PB / KB| QualityEngine[Module 2: 5-Signal Multi-Factor Quality Engine]
+    
+    QualityEngine --> ImgWorker[Module 4: Neural Image Worker & Protection Engine]
+    ImgWorker -->|rembg RMBG-1.4| Studio[Studio Background & 3:4 Aspect Ratio WebP]
+    ImgWorker -->|Face Protection Zone| FaceProtect[Face & Head Zone Preserved 100% Crisp]
+    ImgWorker -->|Gemini Vision 2D Box| Inpaint[Gemini Normalized Bounding Box Inpainter]
+
+    Studio & Inpaint --> VecEngine[Visual Vector Engine - CLIP ViT-B/32]
+    VecEngine -->|Cosine Sim > 0.92| Dup[pgvector Visual Duplicate Design Detector]
+
+    Taxonomy & QualityEngine & ImgWorker --> Copywriter[Module 5: Bilingual B2B Copywriting Engine]
+    Copywriter --> Copy[English & Bengali Titles, Bullets & Profit Pitch]
+
+    Copy --> QARouter[Module 6: QA Scorer & Cloud Sync Engine]
+    QARouter -->|Score >= 85%| Approve[Auto-Approve & Transactional UPSERT]
+```
+
+---
+
+### 9.2. Core Modules & Complete Logic Specifications
+
+#### 1. Pydantic Data Schemas ([scripts/etl_pipeline/schemas.py](file:///d:/Website/scripts/etl_pipeline/schemas.py))
+* Enforces type-safe enums (`HubLocation` [5 Hubs], `PatternCut`, `QualityGrade`) and schema models (`NormalizedSupplierRecord`, `GeneratedCopywriting`).
+* Tracks metadata: `hub_code` (JR, SG, LK, PB, KB), `product_type_code` (JR_01 to KB_10), `product_type_rank` (1-10), `master_group_sku`, `color_variant_name`, `quality_grade`, and `reasons_flagged`.
+
+#### 2. Multi-Factor AI Quality Grading Engine ([scripts/etl_pipeline/quality_engine.py](file:///d:/Website/scripts/etl_pipeline/quality_engine.py))
+Determines product Quality Grade (`LUXURY_EXPORT_GRADE_AAA`, `BOUTIQUE_PREMIUM_GRADE_AA`, `VOLUME_COMMERCIAL_GRADE_A`) by evaluating **5 independent signal sources (Max 160 Points)**:
+
+| Signal | Max Points | Specification & Decision Logic |
+|---|---|---|
+| **① Fabric Keywords** | 40 Pts | Scans text for 25+ fabric weaves: `Roman Silk` (+30), `Pure Organza` (+30), `Cambric 60x60` (+20), `Heavy Rayon 14kg` (+20), `Modal Muslin` (+20), `Cotton Blend` (+5). |
+| **② Craft Keywords** | 40 Pts | Scans for 20+ artisanal techniques: `Zardozi` (+25), `Real Mirror Work` (+25), `Lucknow Chikankari` (+25), `Jaipuri Block Print` (+15), `Gota Patti` (+15), `Thread Work` (+12). |
+| **③ Price Bracket** | 40 Pts | Evaluates wholesale rate: ₹1000+ (+40 Pts), ₹750–₹999 (+30 Pts), ₹500–₹749 (+20 Pts), ₹350–₹499 (+10 Pts). |
+| **④ Gemini Vision AI** | 40 Pts | Conducts visual fabric inspection assessing sheen (silk vs cotton), embroidery density, and print resolution via Gemini Vision API. |
+| **⑤ Production Hub** | 20 Pts | Hub heritage trust score: Lucknow (`UTTAR_PRADESH_LUCKNOW` = +20), Surat (`GUJARAT_SURAT` = +15), Jaipur (`RAJASTHAN_JAIPUR` = +12), Kolkata (`WEST_BENGAL_KOLKATA` = +10). |
+
+* **Grade Decision Cutoffs**:
+  * **Score ≥ 80 Pts** $\rightarrow$ `LUXURY_EXPORT_GRADE_AAA` (MSRP ₹2500+)
+  * **Score ≥ 40 Pts** $\rightarrow$ `BOUTIQUE_PREMIUM_GRADE_AA` (MSRP ₹1200–₹2499)
+  * **Score < 40 Pts** $\rightarrow$ `VOLUME_COMMERCIAL_GRADE_A` (MSRP Under ₹1200)
+
+#### 3. Top 50 B2B Manufacturing Hub Product Taxonomy ([scripts/etl_pipeline/product_taxonomy.py](file:///d:/Website/scripts/etl_pipeline/product_taxonomy.py))
+Defines the **5 India Manufacturing Hubs** and **10 Highest-Demand Product Types per Hub (50 Total)**:
+* **🏛️ Jaipur & Rajasthan (`JR_01` – `JR_10`)**: 60x60 Cambric Anarkalis, Mulmul Dupatta Suits, Sanganeri Block Prints, Gota Patti Festive Suits, Alia/Nyra Cuts, Bagru Dabu Dyes, 40x40 Regular Cotton, Cotton Flex, Pure Mulmul, Short Tunics (30").
+* **🏭 Surat & Gujarat (`SG_01` – `SG_10`)**: Heavy Pakistani Concept Lawn Suits, 18kg Liva Viscose Shararas, Fox Georgette Sequence, 14kg Foil Print Palazzos, Chinon Silk, Co-ord Sets, Roman Silk Jacquard, Micro Unstitched, Poly-Crepe, Heavy Velvet Micro 9000.
+* **🧵 Lucknow & UP (`LK_01` – `LK_10`)**: Faux Georgette Chikankari, Modal Silk Heavy Chikankari, Mulmul Bakhiya Shadow Work, Muslin Mukaish Work, Banarasi Silk Suits, Organza Chikankari Anarkalis, Short Crop Tops, Lizi-Bizi Unstitched, Zardozi Festive Suits, Chikankari Bottomwear.
+* **👳 Punjab & North India (`PB_01` – `PB_10`)**: Patiala Suit Sets (Bahubali Concept), Heavy Phulkari Embroidered Suits, Kashmiri Aari Pashmina Winter Suits, Glace Cottons, Cambric Chiffon Dupattas, Chandni Chowk Bridal Suits, PC Print Nazneen, Velvet Winter Sets, Partywear Georgette, Lycra Stretchables.
+* **🎨 Kolkata & West Bengal (`KB_01` – `KB_10`)**: Bengal Handloom Unstitched Suits, Jamdani Work Suits, Kantha Stitch & Batik Prints, Murshidabad & Tussar Silk Suits, Budget Cotton Kurtis, Khadi Cotton Sets, Organza Chanderi Dupattas, Alpine Nighties, Office Tunics, South Cotton Slub.
+* **`classify_product()` Engine**: Runs keyword scoring across all 50 definitions to automatically assign `product_type_code` (e.g. `JR_01`, `SG_03`), `rank` (1-10), and `hub_code` (JR, SG, LK, PB, KB) to incoming items.
+
+#### 4. Neural Image Worker & Protection Engine ([scripts/etl_pipeline/image_worker.py](file:///d:/Website/scripts/etl_pipeline/image_worker.py))
+* **Face & Head Protection Zone**: Automatically masks upper head/face region (`mask[0:0.30h, 0.20w:0.80w] = 0`) during background removal and inpainting to ensure 100% sharp model eyes, hair, and facial features.
+* **Gemini Vision 2D Bounding Box Watermark Inpainter**: Prompts Gemini Vision API for normalized bounding boxes (`[ymin, xmin, ymax, xmax]` in 0-1000 scale) of supplier phone numbers, watermarks, or competitor logos, converting boxes into OpenCV masks for high-frequency inpainting (`cv2.inpaint`).
+* **Studio Formatting**: Resizes and pads subjects on RMBG-1.4 3:4 studio canvases (`1200x1600@80%` WebP).
+
+#### 5. Change Data Capture & Variant Grouping ([scripts/etl_pipeline/excel_parser.py](file:///d:/Website/scripts/etl_pipeline/excel_parser.py))
+* **CDC Fingerprinting**: Calculates SHA-256 hashes of Excel row payloads + image paths (`cdc_hashes.json`), bypassing unchanged rows during re-runs.
+* **Master SKU Grouping**: Strips color variant suffixes (`_A`, `_B`, `-Wine`, `-Mustard`) to group color variants under 1 parent master product SKU.
+
+#### 6. Automated Bilingual B2B Copywriting ([scripts/etl_pipeline/copywriter.py](file:///d:/Website/scripts/etl_pipeline/copywriter.py))
+* Auto-calculates retailer profit margins (`margin_pct = round(((msrp - per_piece) / per_piece) * 100, 1)`).
+* Generates bilingual English & Bengali marketing titles, bullet points, and reseller profit pitches (e.g. *"Set Wholesale Rate ₹650 | Resell MSRP ₹499/pc | Retailer Profit ₹1,346 per 4-pc set"*).
+
+---
+
+### 9.3. ETL Execution Commands
+
+To execute the hyper-automated vendor ingestion ETL pipeline:
+
+```bash
+# Run full CDC pipeline ingestion across vendor Excel files and catalog images
+python scripts/etl_pipeline/run_etl_pipeline.py
+
+# Run standalone 5-Factor Quality Engine verification
+python -c "from scripts.etl_pipeline.quality_engine import determine_quality_grade; print(determine_quality_grade('Roman Silk Zardozi', 1200))"
+
+# Run 50-Type Taxonomy Auto-Classifier verification
+python -c "from scripts.etl_pipeline.product_taxonomy import classify_product; print(classify_product('Pure Cambric Cotton Anarkali', hub_location='RAJASTHAN_JAIPUR'))"
+```
+
 
 

@@ -6,9 +6,11 @@ import { RotateCcw, MapPin, Tag, ShieldCheck, Sparkles } from 'lucide-react';
 import { COLOR_MAP } from '@/lib/constants';
 
 const HUBS = [
-  { label: '🏰 Jaipur Hub (Cottons & Block Prints)', value: 'RAJASTHAN_JAIPUR' },
-  { label: '🏭 Surat Hub (Rayon & Georgette)', value: 'GUJARAT_SURAT' },
-  { label: '👑 Lucknow Hub (Modal Silk & Chikankari)', value: 'UTTAR_PRADESH_LUCKNOW' },
+  { label: '🏛️ Jaipur & Rajasthan (Cotton & Block Print)', value: 'RAJASTHAN_JAIPUR' },
+  { label: '🏭 Surat & Gujarat (Rayon & Georgette)', value: 'GUJARAT_SURAT' },
+  { label: '🧵 Lucknow & UP (Chikankari & Handloom)', value: 'UTTAR_PRADESH_LUCKNOW' },
+  { label: '👳 Punjab & North (Punjabi Suits & Phulkari)', value: 'PUNJAB_AMRITSAR' },
+  { label: '🎨 Kolkata & Bengal (Handloom & Jamdani)', value: 'WEST_BENGAL_KOLKATA' },
 ];
 
 const QUALITY_GRADES = [

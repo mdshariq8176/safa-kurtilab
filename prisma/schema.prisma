@@ -2,7 +2,7 @@
 // SQLite for local dev; automatically switched to PostgreSQL for Vercel production via vercel-prebuild.js
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -36,7 +36,10 @@ model Product {
   images      String                           // Comma-separated image URLs (cross-DB compatible)
 
   // ── Level 1: Sourcing Hub ──────────────────
-  hubLocation       String?   // RAJASTHAN_JAIPUR | GUJARAT_SURAT | UTTAR_PRADESH_LUCKNOW
+  hubLocation       String?   // RAJASTHAN_JAIPUR | GUJARAT_SURAT | UTTAR_PRADESH_LUCKNOW | PUNJAB_AMRITSAR | WEST_BENGAL_KOLKATA
+  hubCode           String?   // JR | SG | LK | PB | KB
+  productTypeCode   String?   // e.g. JR_01, SG_03, LK_05 (50 Top B2B Types)
+  productTypeRank   Int?      // 1 to 10 (Volume Demand Rank)
   industrialCluster String?   // Sanganer | Sitapura | Millennium Market | Ahmedabad Kalupur | Chowk
 
   // ── Level 2 & 3: Fabric & Yarn Specifications ──

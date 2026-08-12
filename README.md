@@ -140,6 +140,36 @@ npm run build
 
 ---
 
+## 🤖 Enterprise AI ETL Pipeline & B2B Hub Taxonomy
+
+Located in [scripts/etl_pipeline/](file:///d:/Website/scripts/etl_pipeline/), our 6-module AI ETL pipeline automates wholesale Excel parsing, quality grading, watermark inpainting, face protection, and bilingual copywriting.
+
+### Key Capabilities & Logic
+
+1. **5-Signal Multi-Factor Quality Engine ([quality_engine.py](file:///d:/Website/scripts/etl_pipeline/quality_engine.py))**:
+   - Evaluates 5 independent signals (Max 160 Points): Fabric Keywords (40 Pts), Craft & Handwork (40 Pts), Price Bracket (40 Pts), Gemini Vision AI Sheen/Density Inspection (40 Pts), and Sourcing Hub Heritage (20 Pts).
+   - Assigns `LUXURY_EXPORT_GRADE_AAA` (≥80 Pts), `BOUTIQUE_PREMIUM_GRADE_AA` (≥40 Pts), or `VOLUME_COMMERCIAL_GRADE_A` (<40 Pts).
+
+2. **Top 50 B2B Manufacturing Hub Taxonomy ([product_taxonomy.py](file:///d:/Website/scripts/etl_pipeline/product_taxonomy.py))**:
+   - Maps 5 India Manufacturing Hubs (Jaipur, Surat, Lucknow, Punjab, Kolkata) × 10 Highest-Demand Product Types = 50 Total Catalog Definitions.
+   - `classify_product()` auto-classifies incoming raw items into their exact B2B Rank (1-10) and Product Type Code (`JR_01` to `KB_10`).
+
+3. **Face Protection Zone & Gemini 2D Watermark Inpainter ([image_worker.py](file:///d:/Website/scripts/etl_pipeline/image_worker.py))**:
+   - **Face Protection Zone**: Protects upper model head/face (`mask[0:0.30h, 0.20w:0.80w] = 0`), preserving facial features, eyes, skin texture, and hair 100% crisp.
+   - **Gemini Vision 2D Box Inpainter**: Detects normalized bounding boxes (`[ymin, xmin, ymax, xmax]`) of logos, phone numbers, and watermarks, generating high-frequency OpenCV masks for clean auto-inpainting.
+
+4. **Bilingual B2B Sales Copywriting ([copywriter.py](file:///d:/Website/scripts/etl_pipeline/copywriter.py))**:
+   - Generates English & Bengali sales copy + Retailer Profit Margin Calculator (*"Wholesale Rate ₹650 | MSRP ₹499/pc | ₹1,346 Profit per 4-pc set"*).
+
+### Pipeline Execution
+
+```bash
+# Ingest Excel catalogs & reprocess photos
+python scripts/etl_pipeline/run_etl_pipeline.py
+```
+
+---
+
 ## 📦 Bulk Catalog Onboarding & Wholesale Automation
 
 This repository provides three command-line scripts to automate image uploading, catalog data sync to Supabase, and wholesale vendor outreach.

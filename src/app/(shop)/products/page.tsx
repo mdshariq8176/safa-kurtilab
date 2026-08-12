@@ -196,10 +196,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gold-primary/10 pb-6 gap-4">
         <div>
           <span className="text-[10px] text-gold-dark font-bold uppercase tracking-widest flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-gold-primary" /> Curated Luxury Catalog
+            <Sparkles className="w-3.5 h-3.5 text-gold-primary" /> India Manufacturing Hub Catalog
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal mt-1">
-            Safa Couture Collection
+            Top 50 B2B High-Demand Collection
           </h1>
         </div>
 
@@ -221,10 +221,46 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {discount && <input type="hidden" name="discount" value={discount} />}
             {sort && <input type="hidden" name="sort" value={sort} />}
             {page && <input type="hidden" name="page" value={page} />}
+            {hub && <input type="hidden" name="hub" value={hub} />}
           </form>
 
-          {/* Sorting Dropdown (Client Component for interactivity) */}
+          {/* Sorting Dropdown */}
           <SortDropdown initialSort={sort} />
+        </div>
+      </div>
+
+      {/* 5 Manufacturing Hub Horizontal Navigation Bar */}
+      <div className="overflow-x-auto pb-2 scrollbar-none border-b border-gold-primary/10">
+        <div className="flex items-center gap-2 min-w-max">
+          {[
+            { code: '', label: '🌐 All Hubs', tag: '50 B2B Types' },
+            { code: 'RAJASTHAN_JAIPUR', label: '🏛️ Jaipur & Rajasthan', tag: 'Pure Cotton & Block Print' },
+            { code: 'GUJARAT_SURAT', label: '🏭 Surat & Gujarat', tag: 'Rayon & Georgette' },
+            { code: 'UTTAR_PRADESH_LUCKNOW', label: '🧵 Lucknow & UP', tag: 'Chikankari & Handloom' },
+            { code: 'PUNJAB_AMRITSAR', label: '👳 Punjab & North', tag: 'Punjabi Suits & Phulkari' },
+            { code: 'WEST_BENGAL_KOLKATA', label: '🎨 Kolkata & Bengal', tag: 'Handloom Cotton & Jamdani' },
+          ].map((h) => {
+            const isActive = (hub || '') === h.code;
+            return (
+              <Link
+                key={h.code}
+                href={{
+                  pathname: '/products',
+                  query: { ...resolvedParams, hub: h.code || undefined, page: undefined },
+                }}
+                className={`px-4 py-2.5 rounded-lg border text-left transition-all flex flex-col justify-center ${
+                  isActive
+                    ? 'bg-emerald-primary text-white border-emerald-primary shadow-md font-bold'
+                    : 'bg-white text-charcoal border-gold-primary/20 hover:border-gold-primary/50 hover:bg-gold-primary/5'
+                }`}
+              >
+                <span className="text-xs font-semibold">{h.label}</span>
+                <span className={`text-[9px] uppercase tracking-wider font-medium ${isActive ? 'text-gold-primary' : 'text-charcoal/50'}`}>
+                  {h.tag}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 

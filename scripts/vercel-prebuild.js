@@ -14,14 +14,14 @@ function main() {
 
   let content = fs.readFileSync(SCHEMA_PATH, 'utf8');
 
-  // Replace sqlite provider with postgresql for production
-  if (content.includes('provider = "sqlite"')) {
-    console.log('🔌 Switching database provider in schema.prisma from SQLite to PostgreSQL for production deployment...');
+  // Only replace sqlite provider with postgresql when building on Vercel
+  if (process.env.VERCEL && content.includes('provider = "sqlite"')) {
+    console.log('🔌 Switching database provider in schema.prisma from SQLite to PostgreSQL for Vercel production deployment...');
     content = content.replace('provider = "sqlite"', 'provider = "postgresql"');
     fs.writeFileSync(SCHEMA_PATH, content, 'utf8');
     console.log('✅ schema.prisma updated successfully.');
   } else {
-    console.log('ℹ️ Database provider is already set to PostgreSQL. No changes needed.');
+    console.log('ℹ️ Running in local development environment (SQLite preserved).');
   }
 
   // Generate Prisma client for PostgreSQL
