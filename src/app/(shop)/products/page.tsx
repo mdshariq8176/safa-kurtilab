@@ -17,6 +17,9 @@ interface ProductsPageProps {
     sort?: string;
     q?: string;
     page?: string;
+    hub?: string;
+    qualityGrade?: string;
+    patternCut?: string;
   }>;
 }
 
@@ -77,7 +80,7 @@ const getCachedCount = (serializedWhere: string) =>
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
-  const { category, size, color, discount, sort, q, page } = await searchParams;
+  const { category, size, color, discount, sort, q, page, hub, qualityGrade, patternCut } = await searchParams;
 
   // Pagination Configuration
   const pageNum = Number(page) || 1;
@@ -92,6 +95,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     ...(discount && { discount }),
     ...(sort && { sort }),
     ...(q && { q }),
+    ...(hub && { hub }),
+    ...(qualityGrade && { qualityGrade }),
+    ...(patternCut && { patternCut }),
   };
 
   // Build dynamic Prisma database query filters
@@ -100,6 +106,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   if (category) {
     andConditions.push({ category });
+  }
+
+  // B2B Taxonomy Filters (Level 1, 3, 4)
+  if (hub) {
+    andConditions.push({ hubLocation: hub });
+  }
+
+  if (qualityGrade) {
+    andConditions.push({ qualityGrade });
+  }
+
+  if (patternCut) {
+    andConditions.push({ patternCut });
   }
 
   // Filter variants (Size combination)
