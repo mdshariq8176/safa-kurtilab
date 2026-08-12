@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "@supabase/supabase-js": "^2.110.0",
+    "cloudinary": "^2.10.0",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.23.0",
     "marked": "^18.0.5",

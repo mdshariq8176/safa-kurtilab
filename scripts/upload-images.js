@@ -1,5 +1,6 @@
 // scripts/upload-images.js
 // Safa Kurtilab High-Speed Parallel Image Uploader
+try { require('dotenv').config(); } catch (e) {}
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const fsPromises = require('fs/promises');
@@ -7,9 +8,9 @@ const path = require('path');
 
 // Cloudinary Configuration
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'safa-kurtilab',
+  api_key: process.env.CLOUDINARY_API_KEY || '489568912389146',
+  api_secret: process.env.CLOUDINARY_API_SECRET || ''
 });
 
 const IMAGE_DIR = path.join(process.cwd(), 'raw-images');
