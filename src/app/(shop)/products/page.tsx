@@ -23,6 +23,7 @@ interface ProductsPageProps {
   }>;
 }
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 30; // ISR fallback
 
 // Cache filter categories and sizes for 1 hour to prevent redundant DB hits on every request

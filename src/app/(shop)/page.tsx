@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import { ArrowRight, Star, ShoppingBag, Sparkles, Heart } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 60; // ISR: serve cached page instantly, revalidate featured products every 60s
 
 export default async function HomePage() {
