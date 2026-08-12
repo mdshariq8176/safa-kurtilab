@@ -1,4 +1,3 @@
-// Safa Kurtilab REST API endpoint for Products list JSON
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
@@ -6,15 +5,92 @@ import type { Prisma } from '@prisma/client';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
     
+    // Extract query parameters
+    const hub = searchParams.get('hub');
+    const fabricType = searchParams.get('fabricType');
+    const category = searchParams.get('category');
+    const qualityGrade = searchParams.get('qualityGrade');
+    const craftTypes = searchParams.get('craftTypes');
+    const patternCuts = searchParams.get('patternCuts');
+    const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
+    const minMargin = searchParams.get('minMargin');
+    const isBestseller = searchParams.get('isBestseller');
+    const isNewArrival = searchParams.get('isNewArrival');
+    const isHighMargin = searchParams.get('isHighMargin');
+    const search = searchParams.get('search');
+    const sortBy = searchParams.get('sortBy');
+
     const where: Prisma.ProductWhereInput = {};
+
     if (category) {
-      where.category = category;
+      where.category = { contains: category };
+    }
+
+    if (hub) {
+      where.hubLocation = hub;
+    }
+
+    if (fabricType) {
+      where.fabricType = { contains: fabricType };
+    }
+
+    if (qualityGrade) {
+      const grades = qualityGrade.split(',').map((g) => g.trim());
+      where.qualityGrade = { in: grades };
+    }
+
+    if (patternCuts) {
+      const cuts = patternCuts.split(',').map((c) => c.trim());
+      where.patternCut = { in: cuts };
+    }
+
+    if (isBestseller === 'true') {
+      where.isBestseller = true;
+    }
+
+    if (isNewArrival === 'true') {
+      where.isNewArrival = true;
+    }
+
+    if (isHighMargin === 'true') {
+      where.isHighMargin = true;
+    }
+
+    if (minPrice || maxPrice) {
+      where.basePrice = {
+        gte: minPrice ? parseFloat(minPrice) : undefined,
+        lte: maxPrice ? parseFloat(maxPrice) : undefined,
+      };
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search } },
+        { description: { contains: search } },
+        { category: { contains: search } },
+        { fabricType: { contains: search } },
+        { craftTypes: { contains: search } },
+        { patternCut: { contains: search } },
+      ];
+    }
+
+    // Determine sorting order
+    let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' };
+    if (sortBy === 'price_asc') {
+      orderBy = { basePrice: 'asc' };
+    } else if (sortBy === 'price_desc') {
+      orderBy = { basePrice: 'desc' };
+    } else if (sortBy === 'popularity') {
+      orderBy = { isBestseller: 'desc' };
+    } else if (sortBy === 'margin_desc') {
+      orderBy = { retailerMarginPct: 'desc' };
     }
 
     const products = await prisma.product.findMany({
       where,
+      orderBy,
       include: {
         variants: true,
       },

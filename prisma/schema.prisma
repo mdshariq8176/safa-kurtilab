@@ -33,6 +33,28 @@ model Product {
   basePrice           Float
   discount            Float      @default(0) // Percentage
   images              String     // Stored as a comma-separated list or JSON string for cross-database compatibility (SQLite/Postgres)
+  // 7-Level B2B Taxonomy & Inventory Attributes
+  supplierSku         String?    @unique
+  hubLocation         String?    // RAJASTHAN_JAIPUR, GUJARAT_SURAT, UTTAR_PRADESH_LUCKNOW
+  industrialCluster   String?    // Sanganer, Millennium Market, Chowk
+  fabricType          String?    // Cotton, Rayon, Georgette, Modal Silk
+  fabricGrade         String?    // 60x60 Cambric Cotton, 18KG Heavy Rayon
+  yarnSpecGsm         String?    // 60s x 60s / 115 GSM
+  qualityGrade        String?    // GRADE_AAA, GRADE_AA, GRADE_A, GRADE_B
+  craftTypes          String?    // Comma-separated list or JSON string of crafts
+  patternCut          String?    // Anarkali 3-Piece, Alia Cut, Straight Set, Sharara Set
+  exFactoryPrice      Float?     // Cost from manufacturer
+  b2bSetPrice         Float?     // Wholesale price for 4-piece set
+  perPiecePrice       Float?     // Calculated cost per piece
+  msrpRetailPrice     Float?     // Suggested retail selling price per piece
+  retailerMarginPct   Float?     // Retailer profit margin percentage
+  microCostingJson    String?    // JSON string of granular cost components
+  setPcs              Int        @default(4)
+  setRatio            String     @default("SET_4_PCS_M_L_XL_XXL")
+  isBestseller        Boolean    @default(false)
+  isNewArrival        Boolean    @default(true)
+  isHighMargin        Boolean    @default(false)
+
   category            String     // Anarkali, A-Line, Straight Cut, etc.
   variants            Variant[]  // Stock mapping to sizes and colors
   createdAt           DateTime   @default(now())
@@ -45,6 +67,8 @@ model Variant {
   size      String   // XS, S, M, L, XL, XXL
   color     String   // Emerald, Mustard Gold, Crimson, Indigo, Charcoal
   stock     Int      @default(0) // Real-time strict inventory control
+
+  @@unique([productId, size, color])
 }
 
 model Order {

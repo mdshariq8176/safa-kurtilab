@@ -1,100 +1,179 @@
-// scripts/bulk-import.ts
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 
 const prisma = new PrismaClient();
-const DATA_FILE = path.join(process.cwd(), 'products.json');
 
-interface IncomingProduct {
-  name: string; // Maps to title
-  description: string;
-  basePrice: number;
-  imageUrl: string;
-  category: string;
-  stockPerSize: number;
-  color?: string; // Maps to color, defaults to 'Default'
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
 }
 
 async function main() {
-  try {
-    // Check if the data file exists
-    try {
-      await fs.access(DATA_FILE);
-    } catch {
-      console.log(`📂 Creating template products.json file at: ${DATA_FILE}...`);
-      const templateData: IncomingProduct[] = [
-        {
-          name: "Luxury Georgette Anarkali Kurti",
-          description: "Premium ethnic wear with detailed embroidery work perfect for festivals.",
-          basePrice: 1499,
-          imageUrl: "https://res.cloudinary.com/your-cloud/image/upload/v1234/sample.jpg",
-          category: "Anarkali",
-          stockPerSize: 50,
-          color: "Emerald"
-        }
-      ];
-      await fs.writeFile(DATA_FILE, JSON.stringify(templateData, null, 2), 'utf-8');
-      console.log('💡 Created dummy template. Please edit products.json and run this script again!');
-    }
+  const csvFilePath = path.join(process.cwd(), 'catalog_import_template.csv');
+  
+  if (!fs.existsSync(csvFilePath)) {
+    console.error(`❌ CSV File not found at: ${csvFilePath}`);
+    process.exit(1);
+  }
 
-    const rawData = await fs.readFile(DATA_FILE, 'utf-8');
-    const products: IncomingProduct[] = JSON.parse(rawData);
-    
-    console.log(`📦 Starting database ingestion for ${products.length} catalog products...`);
+  console.log(`🚀 Starting Bulk Catalog Import from: ${csvFilePath}`);
+  const content = fs.readFileSync(csvFilePath, 'utf-8');
+  const lines = content.split('\n').filter((l) => l.trim().length > 0);
 
-    const targetSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+  if (lines.length <= 1) {
+    console.log('⚠️ No data rows found in CSV file.');
+    return;
+  }
 
-    await prisma.$transaction(async (tx) => {
-      for (const item of products) {
-        console.log(`Syncing Product: ${item.name}`);
+  const headers = parseCSVLine(lines[0]);
+  console.log(`📋 Found ${headers.length} columns in CSV header.`);
 
-        // Slugify helper
-        const baseSlug = item.name
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .trim()
-          .replace(/\s+/g, '-');
-        
-        // Add randomness suffix to guarantee unique constraint compliance
-        const uniqueSuffix = Math.floor(1000 + Math.random() * 9000);
-        const slug = `${baseSlug}-${uniqueSuffix}`;
+  let importedCount = 0;
 
-        // 1. Core Product Table Entry
-        const createdProduct = await tx.product.create({
-          data: {
-            title: item.name,
-            slug: slug,
-            description: item.description,
-            basePrice: Number(item.basePrice),
-            images: item.imageUrl,
-            category: item.category,
-            discount: 0,
-          }
-        });
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCSVLine(lines[i]);
+    if (row.length < headers.length) continue;
 
-        // 2. Size Variant Auto-Generation (S to XXL)
-        const variantPayload = targetSizes.map(size => ({
-          productId: createdProduct.id,
-          size: size,
-          color: item.color || 'Default',
-          stock: Number(item.stockPerSize),
-        }));
+    const [
+      supplier_sku,
+      title,
+      description,
+      hub_location,
+      industrial_cluster,
+      fabric_type,
+      fabric_grade,
+      yarn_spec_gsm,
+      quality_grade,
+      craft_types,
+      pattern_cut,
+      ex_factory_price,
+      b2b_price,
+      msrp,
+      images,
+      category,
+      is_bestseller,
+      is_new_arrival,
+      is_high_margin,
+      stock_m,
+      stock_l,
+      stock_xl,
+      stock_xxl,
+    ] = row;
 
-        await tx.variant.createMany({
-          data: variantPayload
-        });
+    const b2bPriceNum = parseFloat(b2b_price) || 800;
+    const msrpNum = parseFloat(msrp) || 1999;
+    const perPieceNum = b2bPriceNum / 4;
+    const marginPctNum = parseFloat((((msrpNum - perPieceNum) / perPieceNum) * 100).toFixed(2));
 
-        console.log(`  └─ ✅ Product created with slug '${slug}' and 5 size variants (S-XXL) bound successfully.`);
-      }
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Math.floor(Math.random() * 1000);
+
+    const product = await prisma.product.upsert({
+      where: { supplierSku: supplier_sku },
+      update: {
+        title,
+        description,
+        hubLocation: hub_location,
+        industrialCluster: industrial_cluster,
+        fabricType: fabric_type,
+        fabricGrade: fabric_grade,
+        yarnSpecGsm: yarn_spec_gsm,
+        qualityGrade: quality_grade,
+        craftTypes: craft_types,
+        patternCut: pattern_cut,
+        exFactoryPrice: parseFloat(ex_factory_price) || undefined,
+        b2bSetPrice: b2bPriceNum,
+        perPiecePrice: perPieceNum,
+        msrpRetailPrice: msrpNum,
+        retailerMarginPct: marginPctNum,
+        basePrice: b2bPriceNum,
+        images,
+        category,
+        isBestseller: is_bestseller === 'true',
+        isNewArrival: is_new_arrival === 'true',
+        isHighMargin: is_high_margin === 'true',
+      },
+      create: {
+        supplierSku: supplier_sku,
+        title,
+        slug,
+        description,
+        hubLocation: hub_location,
+        industrialCluster: industrial_cluster,
+        fabricType: fabric_type,
+        fabricGrade: fabric_grade,
+        yarnSpecGsm: yarn_spec_gsm,
+        qualityGrade: quality_grade,
+        craftTypes: craft_types,
+        patternCut: pattern_cut,
+        exFactoryPrice: parseFloat(ex_factory_price) || undefined,
+        b2bSetPrice: b2bPriceNum,
+        perPiecePrice: perPieceNum,
+        msrpRetailPrice: msrpNum,
+        retailerMarginPct: marginPctNum,
+        basePrice: b2bPriceNum,
+        images,
+        category,
+        isBestseller: is_bestseller === 'true',
+        isNewArrival: is_new_arrival === 'true',
+        isHighMargin: is_high_margin === 'true',
+      },
     });
 
-    console.log('🎉 Supabase inventory sync operation completed without errors!');
-  } catch (error) {
-    console.error('❌ Ingestion pipeline failed:', error);
-  } finally {
-    await prisma.$disconnect();
+    // Create / Update 4-Piece Size Variants (M, L, XL, XXL)
+    const sizes = [
+      { size: 'M', stock: parseInt(stock_m) || 10 },
+      { size: 'L', stock: parseInt(stock_l) || 10 },
+      { size: 'XL', stock: parseInt(stock_xl) || 10 },
+      { size: 'XXL', stock: parseInt(stock_xxl) || 10 },
+    ];
+
+    for (const item of sizes) {
+      await prisma.variant.upsert({
+        where: {
+          productId_size_color: {
+            productId: product.id,
+            size: item.size,
+            color: 'Assorted',
+          },
+        },
+        update: { stock: item.stock },
+        create: {
+          productId: product.id,
+          size: item.size,
+          color: 'Assorted',
+          stock: item.stock,
+        },
+      });
+    }
+
+    importedCount++;
+    console.log(`✅ [${importedCount}] Imported SKU: ${supplier_sku} | ${title} (B2B Set: ₹${b2bPriceNum})`);
   }
+
+  console.log(`\n🎉 Successfully processed ${importedCount} products into database!`);
 }
 
-main();
+main()
+  .catch((e) => {
+    console.error('❌ Error executing bulk import:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
