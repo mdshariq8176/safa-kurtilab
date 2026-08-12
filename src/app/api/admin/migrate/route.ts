@@ -7,6 +7,9 @@ import { prisma } from '@/lib/prisma';
 const MIGRATION_SQL = `
   ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "supplierSku" TEXT UNIQUE;
   ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "hubLocation" TEXT;
+  ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "hubCode" TEXT;
+  ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "productTypeCode" TEXT;
+  ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "productTypeRank" INTEGER;
   ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "industrialCluster" TEXT;
   ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "fabricType" TEXT;
   ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "fabricGrade" TEXT;
@@ -35,11 +38,9 @@ const MIGRATION_SQL = `
 
   ALTER TABLE "Variant" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
-  CREATE UNIQUE INDEX IF NOT EXISTS "Variant_productId_size_color_key" ON "Variant"("productId", "size", "color");
   CREATE INDEX IF NOT EXISTS "idx_products_hub_fabric" ON "Product"("hubLocation", "fabricType");
   CREATE INDEX IF NOT EXISTS "idx_products_pattern_cut" ON "Product"("patternCut");
   CREATE INDEX IF NOT EXISTS "idx_products_quality_grade" ON "Product"("qualityGrade");
-  CREATE INDEX IF NOT EXISTS "idx_products_is_plus_size" ON "Product"("isPlusSize");
   CREATE INDEX IF NOT EXISTS "idx_products_b2b_price" ON "Product"("b2bSetPrice");
 `;
 
@@ -195,4 +196,8 @@ export async function POST(request: Request) {
     const errorMessage = error instanceof Error ? error.message : 'Migration failed';
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  return POST(request);
 }
