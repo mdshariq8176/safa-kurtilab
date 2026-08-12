@@ -19,6 +19,7 @@ const getProduct = cache(async (slug: string) => {
   });
 });
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 30; // Cache pages on CDN, revalidate in background every 30s for real-time stock
 export const dynamicParams = true; // Dynamically build other products on demand
 
@@ -39,22 +40,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   };
 }
 
-// Pre-render the 50 most popular/recent designs to make catalog transition instant
+// Pre-render disabled during deployment to allow dynamic DB migrations
 export async function generateStaticParams() {
-  try {
-    const products = await prisma.product.findMany({
-      select: { slug: true },
-      take: 50,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return products.map((product) => ({
-      slug: product.slug,
-    }));
-  } catch (error) {
-    console.error('generateStaticParams failed, fallback to empty array:', error);
-    return [];
-  }
+  return [];
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
