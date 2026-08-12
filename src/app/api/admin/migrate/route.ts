@@ -126,6 +126,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    const results: string[] = [];
     // Execute DDL schema migrations in a single atomic SQL call
     try {
       await prisma.$executeRawUnsafe(MIGRATION_SQL);
