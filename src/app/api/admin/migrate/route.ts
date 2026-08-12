@@ -127,13 +127,16 @@ export async function POST(request: Request) {
 
   try {
     const results: string[] = [];
-    // Execute DDL schema migrations in a single atomic SQL call
-    try {
-      await prisma.$executeRawUnsafe(MIGRATION_SQL);
-      results.push('✅ Executed atomic DDL schema migration');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      results.push(`⚠️ DDL execution note: ${msg}`);
+    const ddlStatements = MIGRATION_SQL.split(';').map((s) => s.trim()).filter((s) => s.length > 0);
+
+    for (const stmt of ddlStatements) {
+      try {
+        await prisma.$executeRawUnsafe(stmt);
+        results.push(`✅ Executed: ${stmt.substring(0, 40)}...`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        results.push(`⏭️ Skipped: ${stmt.substring(0, 40)}... (${msg.substring(0, 50)})`);
+      }
     }
 
     // Run Bulk Fast Taxonomy Classification on ALL products via raw SQL batch
@@ -165,16 +168,22 @@ export async function POST(request: Request) {
           ELSE 'STRAIGHT_SET'
         END,
         "b2bSetPrice" = CASE WHEN "b2bSetPrice" IS NULL OR "b2bSetPrice" = 0 THEN CASE WHEN "basePrice" < 500 THEN "basePrice" * 4 ELSE "basePrice" END ELSE "b2bSetPrice" END;
+    `;
 
+    const priceSql = `
       UPDATE "Product" SET 
         "perPiecePrice" = ROUND(CAST("b2bSetPrice" / COALESCE("setPcs", 4) AS NUMERIC), 2),
         "msrpRetailPrice" = COALESCE("msrpRetailPrice", ROUND(CAST(("b2bSetPrice" / COALESCE("setPcs", 4)) * 2.2 AS NUMERIC), 0));
+    `;
 
+    const marginSql = `
       UPDATE "Product" SET
         "retailerMarginPct" = ROUND(CAST((("msrpRetailPrice" - "perPiecePrice") / GREATEST("perPiecePrice", 1)) * 100 AS NUMERIC), 0);
     `;
 
     const classifiedCount = await prisma.$executeRawUnsafe(updateSql);
+    await prisma.$executeRawUnsafe(priceSql);
+    await prisma.$executeRawUnsafe(marginSql);
 
     return NextResponse.json({
       success: true,
