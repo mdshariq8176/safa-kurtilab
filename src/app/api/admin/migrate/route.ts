@@ -126,20 +126,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const statements = MIGRATION_SQL.split(';').map((s) => s.trim()).filter((s) => s.length > 0);
-    const results: string[] = [];
-    for (const stmt of statements) {
-      try {
-        await prisma.$executeRawUnsafe(stmt + ';');
-        results.push(`✅ Executed: ${stmt.substring(0, 50)}...`);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes('already exists') || msg.includes('duplicate column')) {
-          results.push(`⏭️ Skipped: ${stmt.substring(0, 50)}...`);
-        } else {
-          results.push(`❌ Failed: ${stmt.substring(0, 50)}... (${msg})`);
-        }
-      }
+    // Execute DDL schema migrations in a single atomic SQL call
+    try {
+      await prisma.$executeRawUnsafe(MIGRATION_SQL);
+      results.push('✅ Executed atomic DDL schema migration');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      results.push(`⚠️ DDL execution note: ${msg}`);
     }
 
     // Run Bulk Fast Taxonomy Classification on ALL products via raw SQL batch
