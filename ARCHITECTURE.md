@@ -680,4 +680,33 @@ npm start
   * Processes raw vendor photos in `raw-images/` using pattern vision classifiers.
   * Automatically extracts fabric type (Cambric 60x60, Heavy Rayon 14kg, Modal Silk), craft/work style (Gota Patti, Chikankari, Block Print), and price estimates, appending formatted product records to `src/data/products.csv`.
 
+---
+
+## 🏛️ 8. AI Schema Normalization & Visual Import Command Center (August 12, 2026)
+
+### 8.1. AI-Driven Schema Normalizer Engine
+* **What Was Added**:
+  * Vernacular textile dictionary and structured AI schema translation module [src/lib/ai-schema-normalizer.ts](file:///d:/Website/src/lib/ai-schema-normalizer.ts).
+* **Why It Was Added**:
+  * Wholesalers send unstructured CSVs, Excel files, or WhatsApp text dumps containing multi-lingual terms and slang (`Kapda`, `Kapra`, `D.No`, `Range`, `Malmal`, `Heavy Gota`, `Particulars`) that do not match standard database columns.
+* **How It Was Implemented**:
+  * Uses fuzzy vernacular dictionary matching (`DICTIONARY`) and regex price extraction rules to translate any raw vendor object into a standardized 7-tier B2B record (`title`, `vendor`, `baseRate`, `listingPrice`, `perPiecePrice`, `msrpRetailPrice`, `fabric`, `category`, `qualityGrade`, `patternCut`, `hubLocation`).
+
+### 8.2. Data Sanitation & Guardrail Pipeline
+* **What Was Added**:
+  * Data sanitation and validation engine [src/lib/data-sanitizer.ts](file:///d:/Website/src/lib/data-sanitizer.ts).
+* **Why It Was Added**:
+  * Prevents corrupt prices (e.g., ₹0 or ₹999,999), invalid image URLs, and duplicate slug collisions from entering production database tables.
+* **How It Was Implemented**:
+  * Enforces price floor (₹100) and ceiling (₹20,000), validates HTTP image URLs, applies fallback Cloudinary placeholders, and generates unique slug hashes.
+
+### 8.3. Visual Admin Import Control Center (`/admin/import`)
+* **What Was Added**:
+  * Interactive web ingestion dashboard [src/app/admin/import/page.tsx](file:///d:/Website/src/app/admin/import/page.tsx) and backend API route [src/app/api/admin/import/route.ts](file:///d:/Website/src/app/api/admin/import/route.ts).
+* **Why It Was Added**:
+  * Allows store administrators to paste any raw supplier CSV, JSON, or WhatsApp payload directly into the browser, preview AI column mappings, and sync to Supabase PostgreSQL in 1 click.
+* **How It Was Implemented**:
+  * Provides a split-screen dashboard with raw text input, hub selector (Jaipur, Surat, Lucknow), live schema mapping preview grid, and atomic Prisma transaction execution.
+
+
 
