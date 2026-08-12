@@ -47,7 +47,7 @@ export default function AdminImportPage() {
 
       setPreviewRecords(sanitized);
       setImportStatus(`Parsed ${sanitized.length} preview records successfully. Click "Approve & Import" to sync.`);
-    } catch (err) {
+    } catch {
       setImportStatus('❌ Error parsing input format. Ensure valid CSV or JSON text.');
     }
   };
@@ -73,7 +73,7 @@ export default function AdminImportPage() {
       } else {
         setImportStatus(`❌ Import Error: ${data.message}`);
       }
-    } catch (err) {
+    } catch {
       setImportStatus('❌ Network error while executing import.');
     } finally {
       setIsProcessing(false);
