@@ -27,7 +27,7 @@ function main() {
   // Generate Prisma client for PostgreSQL
   console.log('⚙️ Generating Prisma Client for PostgreSQL...');
   try {
-    execSync('npx prisma generate', { stdio: 'inherit' });
+    execSync('npx prisma generate', { stdio: 'inherit', shell: true });
     console.log('✅ Prisma Client generated successfully.');
   } catch (error) {
     console.error('❌ Failed to generate Prisma Client:', error);
