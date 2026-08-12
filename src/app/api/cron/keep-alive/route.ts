@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Perform a lightweight database query to keep Supabase database active & prevent auto-pausing
     const productCount = await prisma.product.count();

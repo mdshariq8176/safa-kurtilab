@@ -5,7 +5,7 @@ import { COLOR_MAP } from '@/lib/constants';
 import SortDropdown from '@/components/shop/SortDropdown';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, ShoppingBag, Sparkles, Search } from 'lucide-react';
+import { ShoppingBag, Sparkles, Search } from 'lucide-react';
 import { unstable_cache } from 'next/cache';
 
 interface ProductsPageProps {

@@ -27,11 +27,11 @@ const PATTERN_CUTS = [
 ];
 
 interface FilterSidebarProps {
-  categories: string[];
-  sizes: string[];
+  categories?: string[];
+  sizes?: string[];
 }
 
-export default function FilterSidebar({ categories, sizes }: FilterSidebarProps) {
+export default function FilterSidebar({}: FilterSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
