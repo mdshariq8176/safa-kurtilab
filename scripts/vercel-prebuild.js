@@ -24,16 +24,6 @@ function main() {
     console.log('ℹ️ Database provider is already set to PostgreSQL. No changes needed.');
   }
 
-  // Push schema changes to Supabase (applies new columns & indexes)
-  console.log('🗄️ Pushing Prisma schema to Supabase production database...');
-  try {
-    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
-    console.log('✅ Prisma schema synced to Supabase successfully.');
-  } catch (error) {
-    console.error('⚠️ prisma db push failed (non-fatal, continuing build):', error.message);
-    // Non-fatal — continue build even if push fails (e.g., columns already exist)
-  }
-
   // Generate Prisma client for PostgreSQL
   console.log('⚙️ Generating Prisma Client for PostgreSQL...');
   try {
@@ -46,3 +36,4 @@ function main() {
 }
 
 main();
+
