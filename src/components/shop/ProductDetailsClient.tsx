@@ -38,7 +38,7 @@ interface ProductDetailsClientProps {
 
   // State managers
   const [selectedColor, setSelectedColor] = useState(availableColors[0] || '');
-  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || '');
+  const [selectedSize] = useState(availableSizes[0] || '');
   const [selectedRatio, setSelectedRatio] = useState('Standard (M, L, XL, XXL)');
   const [setQuantity, setSetQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'care'>('desc');
