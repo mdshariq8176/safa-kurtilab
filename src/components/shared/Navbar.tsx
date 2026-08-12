@@ -51,7 +51,7 @@ export default function Navbar() {
               <img 
                 src="/images/logo.jpg" 
                 alt="Safa Logo" 
-                className="w-10 h-10 object-contain rounded" 
+                className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-full border-2 border-gold-primary/40 shadow-md transition-transform hover:scale-105" 
               />
               <span className="font-serif text-xl sm:text-2xl font-extrabold tracking-widest uppercase text-emerald-primary hover:text-emerald-light transition-colors">
                 Safa <span className="text-gold-primary">Kurtilab</span>

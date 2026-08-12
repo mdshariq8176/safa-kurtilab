@@ -43,11 +43,11 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
         {/* Brand Column */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img 
               src="/images/logo.jpg" 
               alt="Safa Logo" 
-              className="w-8 h-8 object-contain rounded" 
+              className="w-12 h-12 object-cover rounded-full border-2 border-gold-primary/40 shadow-md" 
             />
             <h4 className="font-serif text-xl font-bold tracking-widest uppercase">
               Safa <span className="text-gold-primary">Kurtilab</span>
