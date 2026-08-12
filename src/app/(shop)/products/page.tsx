@@ -48,36 +48,32 @@ const getCachedFilterOptions = unstable_cache(
   { revalidate: 3600 }
 );
 
-// Cache dynamic product queries for 60 seconds using dynamic cache keys
-const getCachedProducts = (serializedWhere: string, serializedOrderBy: string, skip: number, limit: number) =>
-  unstable_cache(
-    async () => {
-      const where = JSON.parse(serializedWhere);
-      const orderBy = JSON.parse(serializedOrderBy);
-      return prisma.product.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: {
-          variants: true,
-        },
-      });
-    },
-    ['catalog-products-data', serializedWhere, serializedOrderBy, String(skip), String(limit)],
-    { revalidate: 60 }
-  )();
+// Top-level cached product query
+const fetchCachedProducts = unstable_cache(
+  async (serializedWhere: string, serializedOrderBy: string, skip: number, limit: number) => {
+    const where = JSON.parse(serializedWhere);
+    const orderBy = JSON.parse(serializedOrderBy);
+    return prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: { variants: true },
+    });
+  },
+  ['catalog-products-list'],
+  { revalidate: 60 }
+);
 
-// Cache dynamic counts for 60 seconds using dynamic cache keys
-const getCachedCount = (serializedWhere: string) =>
-  unstable_cache(
-    async () => {
-      const where = JSON.parse(serializedWhere);
-      return prisma.product.count({ where });
-    },
-    ['catalog-products-count', serializedWhere],
-    { revalidate: 60 }
-  )();
+// Top-level cached count query
+const fetchCachedCount = unstable_cache(
+  async (serializedWhere: string) => {
+    const where = JSON.parse(serializedWhere);
+    return prisma.product.count({ where });
+  },
+  ['catalog-products-total'],
+  { revalidate: 60 }
+);
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
@@ -185,8 +181,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   // Fetch results and cached filter options in parallel
   const [products, totalCount, filterOptions] = await Promise.all([
-    getCachedProducts(serializedWhere, serializedOrderBy, skip, limit),
-    getCachedCount(serializedWhere),
+    fetchCachedProducts(serializedWhere, serializedOrderBy, skip, limit),
+    fetchCachedCount(serializedWhere),
     getCachedFilterOptions(),
   ]);
 

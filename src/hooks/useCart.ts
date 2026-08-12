@@ -3,27 +3,35 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface CartItem {
-  id: string; // Generated as productId-size-color to isolate variations
+  id: string; // Generated as productId-size-color-ratio to isolate variations
   productId: string;
   title: string;
-  price: number; // Base price
+  price: number; // Base price per set
   discount: number; // Percentage discount
   image: string;
   size: string;
   color: string;
-  quantity: number;
+  quantity: number; // Number of 4-pc sets
+  setRatio?: string; // Standard (M,L,XL,XXL), Heavy L/XL, Plus Size
 }
 
 interface CartStore {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
+  addItem: (item: Omit<CartItem, 'id'>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-  getCartTotal: () => number; // Subtotal after discount, before tax
+  getCartTotal: () => number; // Subtotal after volume tier & product discount, before tax
+  getTotalSavings: () => number; // Total wholesale savings amount
   getGSTAmount: () => number; // 5% GST
   getGrandTotal: () => number; // Subtotal + GST
   getItemCount: () => number;
+}
+
+export function getVolumeDiscountTier(totalSets: number): { pct: number; label: string } {
+  if (totalSets >= 21) return { pct: 16, label: 'Master Wholesaler (16% OFF)' };
+  if (totalSets >= 6) return { pct: 8, label: 'Bulk Wholesale (8% OFF)' };
+  return { pct: 0, label: 'Standard Wholesale' };
 }
 
 export const useCartStore = create<CartStore>()(
@@ -31,14 +39,16 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       addItem: (newItem) => {
-        const id = `${newItem.productId}-${newItem.size}-${newItem.color}`;
+        const ratioKey = newItem.setRatio || 'Standard (M,L,XL,XXL)';
+        const id = `${newItem.productId}-${newItem.size}-${newItem.color}-${ratioKey}`;
         const items = [...get().items];
         const existingItemIndex = items.findIndex((item) => item.id === id);
 
+        const qtyToAdd = newItem.quantity || 1;
         if (existingItemIndex > -1) {
-          items[existingItemIndex].quantity += 1;
+          items[existingItemIndex].quantity += qtyToAdd;
         } else {
-          items.push({ ...newItem, id, quantity: 1 });
+          items.push({ ...newItem, id, quantity: qtyToAdd, setRatio: ratioKey });
         }
 
         set({ items });
@@ -59,10 +69,26 @@ export const useCartStore = create<CartStore>()(
       },
       clearCart: () => set({ items: [] }),
       getCartTotal: () => {
+        const totalSets = get().items.reduce((sum, item) => sum + item.quantity, 0);
+        const volumeTier = getVolumeDiscountTier(totalSets);
+
         return get().items.reduce((total, item) => {
-          const discountAmt = item.price * (item.discount / 100);
-          const finalItemPrice = item.price - discountAmt;
-          return total + finalItemPrice * item.quantity;
+          const productDiscount = item.price * (item.discount / 100);
+          const baseSalePrice = item.price - productDiscount;
+          const volumeDiscount = baseSalePrice * (volumeTier.pct / 100);
+          const finalSetPrice = baseSalePrice - volumeDiscount;
+          return total + finalSetPrice * item.quantity;
+        }, 0);
+      },
+      getTotalSavings: () => {
+        const totalSets = get().items.reduce((sum, item) => sum + item.quantity, 0);
+        const volumeTier = getVolumeDiscountTier(totalSets);
+
+        return get().items.reduce((sum, item) => {
+          const productDiscount = item.price * (item.discount / 100);
+          const baseSalePrice = item.price - productDiscount;
+          const volumeDiscount = baseSalePrice * (volumeTier.pct / 100);
+          return sum + (productDiscount + volumeDiscount) * item.quantity;
         }, 0);
       },
       getGSTAmount: () => {
@@ -100,6 +126,7 @@ export function useCart() {
     updateQuantity: store.updateQuantity,
     clearCart: store.clearCart,
     cartTotal: isHydrated ? store.getCartTotal() : 0,
+    totalSavings: isHydrated ? store.getTotalSavings() : 0,
     gstAmount: isHydrated ? store.getGSTAmount() : 0,
     grandTotal: isHydrated ? store.getGrandTotal() : 0,
     itemCount: isHydrated ? store.getItemCount() : 0,

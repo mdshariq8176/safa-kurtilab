@@ -639,3 +639,45 @@ npm start
   * Standardized storefront cards to display wholesale set pricing (`Set of 4 Pcs`) and B2B MSRP markup indicators while hiding internal margin percentages.
   * Connected sidebar hub filters (`JAIPUR_HUB`, `SURAT_HUB`, `LUCKNOW_HUB`) directly to indexed server-side query filters.
 
+---
+
+## 🏛️ 7. Enterprise Subsystem Expansion & Optimization (August 12, 2026)
+
+### 7.1. Instant Lag-Free Faceted Filters Architecture
+* **What Was Added**:
+  * Integrated a 250ms debounced URL router transition in [FilterSidebar.tsx](file:///d:/Website/src/components/shop/FilterSidebar.tsx) and top-level `unstable_cache` functions in [products/page.tsx](file:///d:/Website/src/app/(shop)/products/page.tsx).
+* **Why It Was Added**:
+  * Rapidly clicking checkboxes or radio buttons in the filter sidebar triggered simultaneous blocking server re-fetches over network, causing visible UI lag.
+* **How It Was Implemented**:
+  * Checkboxes and radio buttons update local React state instantly (0ms response).
+  * A 250ms debounced `useEffect` batches URL updates into a single `router.replace(targetUrl, { scroll: false })` call.
+  * Declared top-level cached functions `fetchCachedProducts` and `fetchCachedCount` with dynamic cache keys, accelerating repeat filter lookups.
+
+### 7.2. Dynamic Tiered B2B Volume Slab Pricing & Custom Size Ratio Engine
+* **What Was Added**:
+  * Volume slab pricing matrix (1-5 sets @ Base Rate, 6-20 sets @ 8% OFF, 21+ sets @ 16% OFF) and Flexible Size Ratio Selector (`Standard M,L,XL,XXL`, `Heavy L,L,XL,XL`, `Plus Size XL,XXL,3XL,4XL`) in [ProductDetailsClient.tsx](file:///d:/Website/src/components/shop/ProductDetailsClient.tsx).
+* **Why It Was Added**:
+  * High-volume wholesale buyers require bulk volume pricing incentives and customized size bundles tailored to their retail customer demographics.
+* **How It Was Implemented**:
+  * Extended `CartItem` type in [useCart.ts](file:///d:/Website/src/hooks/useCart.ts) with `setRatio` and `totalSavings` calculations.
+  * Dynamically computes volume slab discounts in `getCartTotal()` based on total set quantity across cart items.
+
+### 7.3. One-Click Printable PDF GST Proforma Invoice & Quotation Engine
+* **What Was Added**:
+  * Vector PDF invoice generator module [src/lib/pdf-invoice.ts](file:///d:/Website/src/lib/pdf-invoice.ts) and checkout integration in [checkout/page.tsx](file:///d:/Website/src/app/(shop)/checkout/page.tsx).
+* **Why It Was Added**:
+  * Business buyers require formal tax quotations with HSN codes, CGST/SGST vs IGST tax splits, and bank RTGS details for corporate accounting and wire transfers.
+* **How It Was Implemented**:
+  * Generates print-ready vector HTML/PDF invoices containing HSN `6204.22.00` items, state-wise tax splits (CGST 2.5% + SGST 2.5% for intra-state Rajasthan; IGST 5.0% for inter-state), and HDFC Bank RTGS details.
+  * Adds one-click `📄 Download Proforma GST Invoice (PDF)` trigger on checkout success.
+
+### 7.4. Gemini Vision AI Multimodal Catalog Ingestion Pipeline
+* **What Was Added**:
+  * Multimodal AI ingestion script [scripts/vision-ai-ingest.py](file:///d:/Website/scripts/vision-ai-ingest.py).
+* **Why It Was Added**:
+  * Manually typing fabric specifications, embroidery style, pattern cut, and sleeve details for raw vendor photos received via WhatsApp/Drive was time-consuming.
+* **How It Was Implemented**:
+  * Processes raw vendor photos in `raw-images/` using pattern vision classifiers.
+  * Automatically extracts fabric type (Cambric 60x60, Heavy Rayon 14kg, Modal Silk), craft/work style (Gota Patti, Chikankari, Block Print), and price estimates, appending formatted product records to `src/data/products.csv`.
+
+

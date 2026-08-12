@@ -7,11 +7,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { openPrintableInvoice } from '@/lib/pdf-invoice';
+
 // Indian GSTIN regex validation formula
 const GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
 
 export default function CheckoutPage() {
-  const { items, cartTotal, gstAmount, grandTotal, clearCart } = useCart();
+  const { items, cartTotal, totalSavings, gstAmount, grandTotal, clearCart } = useCart();
   const meetsMOQ = items.length >= 5 || cartTotal >= 5000;
 
   // Contact details form
@@ -191,19 +193,44 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="flex gap-4 justify-center">
-          <Link href="/">
-            <button className="px-6 py-2.5 bg-emerald-primary hover:bg-emerald-light text-white text-xs font-semibold tracking-wider uppercase rounded transition-colors shadow">
-              Return Home
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <button
+              onClick={() =>
+                openPrintableInvoice({
+                  orderId: createdOrderId || 'SAFA-PROFORMA-99',
+                  date: new Date().toLocaleDateString('en-IN'),
+                  customerName: formData.name || 'B2B Client',
+                  companyName: formData.companyName || undefined,
+                  gstin: formData.gstin || undefined,
+                  address: formData.address,
+                  city: formData.city,
+                  state: formData.state,
+                  pincode: formData.pincode,
+                  phone: formData.phone,
+                  items: items.map((i) => ({
+                    title: i.title,
+                    setRatio: i.setRatio,
+                    quantity: i.quantity,
+                    setPrice: i.price,
+                    totalAmount: i.price * i.quantity,
+                  })),
+                  subtotal: cartTotal,
+                  discountAmount: totalSavings,
+                  gstAmount: gstAmount,
+                  grandTotal: grandTotal,
+                })
+              }
+              className="px-6 py-2.5 bg-gold-dark hover:bg-gold-primary text-white text-xs font-semibold tracking-wider uppercase rounded transition-colors shadow flex items-center justify-center gap-2"
+            >
+              📄 Download Proforma GST Invoice (PDF)
             </button>
-          </Link>
-          <Link href="/admin">
-            <button className="px-6 py-2.5 border border-gold-primary/30 hover:border-gold-primary text-gold-dark hover:text-emerald-primary text-xs font-semibold tracking-wider uppercase rounded transition-colors">
-              Manage Orders
-            </button>
-          </Link>
+            <Link href="/">
+              <button className="w-full sm:w-auto px-6 py-2.5 bg-emerald-primary hover:bg-emerald-light text-white text-xs font-semibold tracking-wider uppercase rounded transition-colors shadow">
+                Return Home
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
     );
   }
 

@@ -53,6 +53,33 @@ export default function FilterSidebar({}: FilterSidebarProps) {
     setLocalColor(searchParams.get('color'));
   }, [searchParams]);
 
+  // Debounced URL sync to prevent rapid network thrashing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      const updateParam = (key: string, val: string | null) => {
+        if (val) params.set(key, val); else params.delete(key);
+      };
+
+      updateParam('hub', localHub);
+      updateParam('qualityGrade', localGrade);
+      updateParam('patternCut', localCut);
+      updateParam('category', localCategory);
+      updateParam('size', localSize);
+      updateParam('color', localColor);
+
+      const targetUrl = `${pathname}?${params.toString()}`;
+      if (targetUrl !== `${pathname}?${searchParams.toString()}`) {
+        startTransition(() => {
+          router.replace(targetUrl, { scroll: false });
+        });
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [localHub, localGrade, localCut, localCategory, localSize, localColor, pathname, router, searchParams]);
+
   const updateQuery = (key: string, value: string | null) => {
     if (key === 'hub') setLocalHub(value);
     if (key === 'qualityGrade') setLocalGrade(value);
@@ -60,16 +87,6 @@ export default function FilterSidebar({}: FilterSidebarProps) {
     if (key === 'category') setLocalCategory(value);
     if (key === 'size') setLocalSize(value);
     if (key === 'color') setLocalColor(value);
-
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
   };
 
   const clearAll = () => {
@@ -79,9 +96,6 @@ export default function FilterSidebar({}: FilterSidebarProps) {
     setLocalCategory(null);
     setLocalSize(null);
     setLocalColor(null);
-    startTransition(() => {
-      router.replace(pathname, { scroll: false });
-    });
   };
 
   const hasFilters = localHub || localGrade || localCut || localCategory || localSize || localColor;

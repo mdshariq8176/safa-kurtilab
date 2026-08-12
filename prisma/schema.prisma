@@ -2,7 +2,7 @@
 // SQLite for local dev; automatically switched to PostgreSQL for Vercel production via vercel-prebuild.js
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

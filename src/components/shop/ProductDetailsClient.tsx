@@ -39,14 +39,20 @@ interface ProductDetailsClientProps {
   // State managers
   const [selectedColor, setSelectedColor] = useState(availableColors[0] || '');
   const [selectedSize, setSelectedSize] = useState(availableSizes[0] || '');
+  const [selectedRatio, setSelectedRatio] = useState('Standard (M, L, XL, XXL)');
+  const [setQuantity, setSetQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'care'>('desc');
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isAddedSuccessfully, setIsAddedSuccessfully] = useState(false);
 
-  // Calculate pricing
+  // Dynamic Volume Tier Discount calculation
+  const volumeDiscountPct = setQuantity >= 21 ? 16 : setQuantity >= 6 ? 8 : 0;
   const discountAmt = product.basePrice * (product.discount / 100);
-  const salePrice = product.basePrice - discountAmt;
-  const hasDiscount = product.discount > 0;
+  const baseSalePrice = product.basePrice - discountAmt;
+  const tierDiscountAmt = baseSalePrice * (volumeDiscountPct / 100);
+  const finalSetPrice = baseSalePrice - tierDiscountAmt;
+  const perPiecePrice = (finalSetPrice / 4).toFixed(0);
+  const hasDiscount = product.discount > 0 || volumeDiscountPct > 0;
 
   // Retrieve current stock level for the selected variant
   const currentVariant = product.variants.find(
@@ -59,7 +65,6 @@ interface ProductDetailsClientProps {
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
-    // Add to cart state
     addItem({
       productId: product.id,
       title: product.title,
@@ -68,16 +73,22 @@ interface ProductDetailsClientProps {
       image: product.images,
       size: selectedSize,
       color: selectedColor,
+      quantity: setQuantity,
+      setRatio: selectedRatio,
     });
 
-    // Alert successful addition with animated drawer trigger
     setIsAddedSuccessfully(true);
     setTimeout(() => setIsAddedSuccessfully(false), 2500);
 
-    // Open standard cart drawer (simulate navbar click)
     const cartButton = document.querySelector('button[class*="bg-emerald-primary"]') as HTMLButtonElement;
     if (cartButton) cartButton.click();
   };
+
+  const SET_RATIOS = [
+    { name: 'Standard (M, L, XL, XXL)', desc: '1 M, 1 L, 1 XL, 1 XXL (Equal 4-Pc Bundle)' },
+    { name: 'Heavy Sizes (L, L, XL, XL)', desc: '2 L, 2 XL (High-Volume Fast Retailers)' },
+    { name: 'Plus Size (XL, XXL, 3XL, 4XL)', desc: '1 XL, 1 XXL, 1 3XL, 1 4XL (Plus-Size Specialty)' },
+  ];
 
   return (
     <div className="space-y-12">
@@ -101,7 +112,7 @@ interface ProductDetailsClientProps {
           {/* Header metadata */}
           <div className="space-y-2">
             <span className="text-[10px] text-gold-dark font-bold uppercase tracking-widest flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Safa Luxe Silhouette
+              <Sparkles className="w-3.5 h-3.5" /> Safa Luxe Silhouette • 4-Piece Wholesale Set
             </span>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">{product.title}</h1>
             <div className="flex gap-3 items-center">
@@ -110,83 +121,129 @@ interface ProductDetailsClientProps {
                   <Star key={i} className="w-3.5 h-3.5 fill-current" />
                 ))}
               </div>
-              <span className="text-xs text-charcoal/50 font-semibold">(4.9/5 Based on 42 Ratings)</span>
+              <span className="text-xs text-charcoal/50 font-semibold">(4.9/5 Based on 42 B2B Client Reviews)</span>
             </div>
           </div>
 
-          {/* Pricing area */}
-          <div className="p-4 bg-white border border-gold-primary/10 rounded-xl flex items-center gap-4">
-            <div className="flex flex-col">
-              {hasDiscount && (
-                <span className="text-xs text-charcoal/40 line-through">MRP ₹{product.basePrice}</span>
+          {/* Pricing area with Tiered Wholesale Matrix */}
+          <div className="p-5 bg-white border border-gold-primary/20 rounded-xl space-y-4 shadow-sm">
+            <div className="flex justify-between items-baseline border-b border-gold-primary/10 pb-3">
+              <div>
+                <span className="text-[10px] text-charcoal/50 uppercase font-bold tracking-wider block">Wholesale Set Rate (4 Pcs)</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-emerald-primary">
+                    ₹{finalSetPrice.toLocaleString('en-IN')}
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-xs text-charcoal/40 line-through">₹{product.basePrice}</span>
+                  )}
+                  <span className="text-xs text-emerald-dark font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    ≈ ₹{perPiecePrice}/piece
+                  </span>
+                </div>
+              </div>
+              {volumeDiscountPct > 0 && (
+                <span className="bg-emerald-primary text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded shadow-sm">
+                  {volumeDiscountPct}% Volume Tier Applied
+                </span>
               )}
-              <span className="text-2xl font-bold text-emerald-primary">
-                ₹{salePrice.toLocaleString('en-IN')}
-              </span>
             </div>
-            {hasDiscount && (
-              <span className="bg-emerald-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest rounded">
-                Save {product.discount}%
+
+            {/* B2B Volume Slab Pricing Table */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-gold-dark font-extrabold uppercase tracking-widest block">
+                💎 B2B Volume Slab Savings Matrix
               </span>
-            )}
-            <span className="text-[10px] text-charcoal/50 font-medium ml-auto">Inclusive of all local taxes</span>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className={`p-2 rounded border transition-all ${setQuantity <= 5 ? 'border-emerald-primary bg-emerald-50/50 font-bold text-emerald-primary' : 'border-gray-200 text-charcoal/70'}`}>
+                  <div className="font-bold">1 – 5 Sets</div>
+                  <div className="text-[10px] text-charcoal/60">Standard Rate</div>
+                </div>
+                <div className={`p-2 rounded border transition-all ${setQuantity >= 6 && setQuantity <= 20 ? 'border-emerald-primary bg-emerald-50/50 font-bold text-emerald-primary' : 'border-gray-200 text-charcoal/70'}`}>
+                  <div className="font-bold">6 – 20 Sets</div>
+                  <div className="text-[10px] text-emerald-dark font-bold">8% OFF</div>
+                </div>
+                <div className={`p-2 rounded border transition-all ${setQuantity >= 21 ? 'border-emerald-primary bg-emerald-50/50 font-bold text-emerald-primary' : 'border-gray-200 text-charcoal/70'}`}>
+                  <div className="font-bold">21+ Sets</div>
+                  <div className="text-[10px] text-emerald-dark font-bold">16% OFF</div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Colors Selection Swatch */}
+          {/* Flexible B2B Size-Ratio Selector */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider block">
-              Selected Colorway: <strong className="text-charcoal">{selectedColor}</strong>
+              📦 Select Custom B2B Set Ratio (4 Pcs / Set)
             </label>
-            <div className="flex gap-3">
-              {availableColors.map((color) => {
-                const isActive = selectedColor === color;
+            <div className="space-y-2">
+              {SET_RATIOS.map((ratio) => {
+                const isActive = selectedRatio === ratio.name;
                 return (
+                  <button
+                    key={ratio.name}
+                    onClick={() => setSelectedRatio(ratio.name)}
+                    className={`w-full text-left p-3 rounded-lg border text-xs transition-all flex justify-between items-center ${
+                      isActive
+                        ? 'border-emerald-primary bg-emerald-50/40 text-emerald-primary font-bold shadow-sm'
+                        : 'border-gold-primary/20 hover:border-gold-primary text-charcoal bg-white'
+                    }`}
+                  >
+                    <div>
+                      <div>{ratio.name}</div>
+                      <div className="text-[10px] font-normal text-charcoal/60">{ratio.desc}</div>
+                    </div>
+                    {isActive && <span className="text-emerald-primary text-xs">✓ Selected</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Color & Size Swatches */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Colors Swatch */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider block">
+                Colorway: <strong>{selectedColor}</strong>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availableColors.map((color) => (
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
-                    className={`px-4 py-2 border rounded text-xs font-semibold uppercase transition-all ${
-                      isActive
-                        ? 'border-emerald-primary bg-emerald-primary/5 text-emerald-primary shadow-sm'
-                        : 'border-gold-primary/20 hover:border-gold-primary text-charcoal/70 bg-white'
+                    className={`px-3 py-1.5 border rounded text-xs font-semibold uppercase transition-all ${
+                      selectedColor === color
+                        ? 'border-emerald-primary bg-emerald-primary text-white'
+                        : 'border-gold-primary/20 text-charcoal bg-white'
                     }`}
                   >
                     {color}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Sizes Selection Swatch */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            {/* Set Quantity Selector */}
+            <div className="space-y-2">
               <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider block">
-                Selected Size: <strong className="text-charcoal">{selectedSize}</strong>
+                Quantity (Sets of 4 Pcs)
               </label>
-              <button
-                onClick={() => setIsSizeGuideOpen(true)}
-                className="flex items-center gap-1 text-[10px] font-bold text-gold-dark hover:text-emerald-primary uppercase tracking-wider transition-colors"
-              >
-                <Ruler className="w-3.5 h-3.5" /> Size Guide
-              </button>
-            </div>
-            <div className="flex gap-2">
-              {availableSizes.map((size) => {
-                const isActive = selectedSize === size;
-                return (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-10 h-10 border rounded text-xs font-bold transition-all ${
-                      isActive
-                        ? 'border-emerald-primary bg-emerald-primary text-white shadow'
-                        : 'border-gold-primary/20 hover:border-gold-primary text-charcoal bg-white'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                );
-              })}
+              <div className="flex items-center border border-gold-primary/30 rounded bg-white w-32">
+                <button
+                  onClick={() => setSetQuantity(Math.max(1, setQuantity - 1))}
+                  className="px-3 py-2 text-charcoal/70 hover:text-emerald-primary text-sm font-bold"
+                >
+                  -
+                </button>
+                <span className="flex-1 text-center font-bold text-xs">{setQuantity}</span>
+                <button
+                  onClick={() => setSetQuantity(setQuantity + 1)}
+                  className="px-3 py-2 text-charcoal/70 hover:text-emerald-primary text-sm font-bold"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
 
