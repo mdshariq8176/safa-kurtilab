@@ -236,65 +236,83 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <div className="space-y-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {products.map((product) => {
-                  const discountAmt = product.basePrice * (product.discount / 100);
-                  const salePrice = product.basePrice - discountAmt;
-                  const hasDiscount = product.discount > 0;
+                  const b2bSetPrice = product.b2bSetPrice || product.basePrice;
+                  const perPiece = product.perPiecePrice || (b2bSetPrice / 4);
+                  const msrp = product.msrpRetailPrice || (perPiece * 2.5);
+                  const marginPct = product.retailerMarginPct || Math.round(((msrp - perPiece) / perPiece) * 100);
+
+                  // Map Hub Location Labels
+                  let hubLabel = 'Jaipur Hub';
+                  if (product.hubLocation === 'GUJARAT_SURAT') hubLabel = 'Surat Hub';
+                  if (product.hubLocation === 'UTTAR_PRADESH_LUCKNOW') hubLabel = 'Lucknow Hub';
 
                   return (
                     <div
                       key={product.id}
-                      className="group bg-white border border-gold-primary/10 rounded-xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full animate-slide-up"
+                      className="group bg-white border border-gold-primary/15 rounded-xl overflow-hidden hover:shadow-xl transition-all flex flex-col h-full animate-slide-up"
                     >
                       {/* Image Container */}
                       <Link
                         href={`/products/${product.slug}`}
-                        className="relative block w-full h-[320px] bg-alabaster overflow-hidden border-b border-gold-primary/5 cursor-pointer"
+                        className="relative block w-full h-[300px] bg-alabaster overflow-hidden border-b border-gold-primary/10 cursor-pointer"
                       >
-                        {hasDiscount && (
-                          <span className="absolute top-4 left-4 bg-emerald-primary text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-widest rounded z-10">
-                            {product.discount}% Off
-                          </span>
-                        )}
+                        {/* Hub Location Badge */}
+                        <span className="absolute top-3 left-3 bg-emerald-primary/95 text-gold-primary text-[9px] font-extrabold px-2.5 py-1 uppercase tracking-widest rounded-full z-10 shadow-md border border-gold-primary/30 flex items-center gap-1">
+                          📍 {hubLabel}
+                        </span>
+
+                        {/* Margin Potential Badge */}
+                        <span className="absolute bottom-3 right-3 bg-gold-primary text-charcoal font-bold text-[9px] px-2 py-0.5 uppercase tracking-wider rounded z-10 shadow">
+                          🔥 {marginPct}% Retailer Margin
+                        </span>
+
                         <Image
                           src={product.images}
                           alt={product.title}
                           fill
-                          className="object-cover group-hover:scale-102 transition-transform duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </Link>
 
                       {/* Product Metadata */}
-                      <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                         <div>
-                          <span className="text-[10px] text-gold-dark font-bold uppercase tracking-widest">
-                            {product.category}
-                          </span>
+                          <div className="flex justify-between items-center text-[10px] font-bold text-gold-dark uppercase tracking-wider">
+                            <span>{product.fabricGrade || product.category}</span>
+                            <span className="text-charcoal/50">SKU: {product.supplierSku || 'SKL-JPR-01'}</span>
+                          </div>
                           <h3 className="font-serif text-base font-semibold text-charcoal mt-1 group-hover:text-emerald-primary transition-colors line-clamp-1">
                             {product.title}
                           </h3>
                           <div className="flex gap-2 items-center text-xs mt-1">
-                            <div className="flex text-amber-500">
-                              {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="w-3 h-3 fill-current" />
-                              ))}
-                            </div>
-                            <span className="text-charcoal/40 font-medium">(4.9)</span>
+                            <span className="text-[10px] bg-emerald-primary/10 text-emerald-primary font-bold px-1.5 py-0.5 rounded">
+                              {product.patternCut || '4-Piece B2B Bundle (M-XXL)'}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Pricing and Action */}
-                        <div className="flex items-center justify-between mt-5 pt-3 border-t border-gold-primary/5">
-                          <div className="flex flex-col">
-                            {hasDiscount && (
-                              <span className="text-xs text-charcoal/40 line-through">₹{product.basePrice}</span>
-                            )}
-                            <span className="text-sm font-bold text-emerald-primary">
-                              ₹{salePrice.toLocaleString('en-IN')}
+                        {/* B2B Pricing and Action */}
+                        <div className="pt-3 border-t border-gold-primary/10 flex items-end justify-between">
+                          <div>
+                            <span className="text-[10px] text-charcoal/60 uppercase font-bold tracking-wider block">
+                              4-Piece B2B Set Price
+                            </span>
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-lg font-extrabold text-emerald-primary">
+                                ₹{b2bSetPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[10px] text-charcoal/60 font-semibold">
+                                (₹{Math.round(perPiece)}/Pc)
+                              </span>
+                            </div>
+                            <span className="text-[9px] text-gold-dark font-bold block mt-0.5">
+                              MSRP: ₹{Math.round(msrp)}/Pc
                             </span>
                           </div>
+
                           <Link href={`/products/${product.slug}`}>
-                            <button className="px-4 py-2 bg-emerald-primary hover:bg-emerald-light text-white text-xs font-semibold tracking-wider uppercase rounded transition-colors flex items-center gap-1.5">
-                              <ShoppingBag className="w-3.5 h-3.5" /> Details
+                            <button className="px-3.5 py-2 bg-emerald-primary hover:bg-emerald-light text-white text-[10px] font-bold tracking-wider uppercase rounded transition-all shadow hover:shadow-md flex items-center gap-1">
+                              <ShoppingBag className="w-3.5 h-3.5" /> Order Set
                             </button>
                           </Link>
                         </div>
