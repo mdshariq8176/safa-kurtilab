@@ -1,5 +1,5 @@
-// Safa Kurtilab Database Schema
-// Optimized for local development with SQLite and easily switchable to PostgreSQL for production.
+// Safa Kurtilab Database Schema — v2.0 (B2B Taxonomy + Extended Product Metadata)
+// SQLite for local dev; automatically switched to PostgreSQL for Vercel production via vercel-prebuild.js
 
 datasource db {
   provider = "sqlite"
@@ -10,84 +10,116 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
+// ─────────────────────────────────────────────
+// USER MODEL
+// ─────────────────────────────────────────────
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String?
-  role          String    @default("USER") // Using String for SQLite/Postgres enum cross-compatibility
-  orders        Order[]
-  createdAt     DateTime  @default(now())
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  role      String   @default("USER") // USER | ADMIN — String for SQLite/Postgres compatibility
+  orders    Order[]
+  createdAt DateTime @default(now())
 }
 
+// ─────────────────────────────────────────────
+// PRODUCT MODEL — Full B2B Taxonomy + Dimensions + Financial Data
+// ─────────────────────────────────────────────
 model Product {
-  id                  String     @id @default(cuid())
-  title               String
-  slug                String     @unique
-  description         String
-  basePrice           Float
-  discount            Float      @default(0) // Percentage
-  images              String     // Stored as a comma-separated list or JSON string for cross-database compatibility (SQLite/Postgres)
-  // 7-Level B2B Taxonomy & Inventory Attributes
-  supplierSku         String?    @unique
-  hubLocation         String?    // RAJASTHAN_JAIPUR, GUJARAT_SURAT, UTTAR_PRADESH_LUCKNOW
-  industrialCluster   String?    // Sanganer, Millennium Market, Chowk
-  fabricType          String?    // Cotton, Rayon, Georgette, Modal Silk
-  fabricGrade         String?    // 60x60 Cambric Cotton, 18KG Heavy Rayon
-  yarnSpecGsm         String?    // 60s x 60s / 115 GSM
-  qualityGrade        String?    // GRADE_AAA, GRADE_AA, GRADE_A, GRADE_B
-  craftTypes          String?    // Comma-separated list or JSON string of crafts
-  patternCut          String?    // Anarkali 3-Piece, Alia Cut, Straight Set, Sharara Set
-  exFactoryPrice      Float?     // Cost from manufacturer
-  b2bSetPrice         Float?     // Wholesale price for 4-piece set
-  perPiecePrice       Float?     // Calculated cost per piece
-  msrpRetailPrice     Float?     // Suggested retail selling price per piece
-  retailerMarginPct   Float?     // Retailer profit margin percentage
-  microCostingJson    String?    // JSON string of granular cost components
-  setPcs              Int        @default(4)
-  setRatio            String     @default("SET_4_PCS_M_L_XL_XXL")
-  isBestseller        Boolean    @default(false)
-  isNewArrival        Boolean    @default(true)
-  isHighMargin        Boolean    @default(false)
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String
+  basePrice   Float                            // Legacy retail base price
+  discount    Float     @default(0)            // Retail discount %
+  images      String                           // Comma-separated image URLs (cross-DB compatible)
 
-  category            String     // Anarkali, A-Line, Straight Cut, etc.
-  variants            Variant[]  // Stock mapping to sizes and colors
-  createdAt           DateTime   @default(now())
+  // ── Level 1: Sourcing Hub ──────────────────
+  hubLocation       String?   // RAJASTHAN_JAIPUR | GUJARAT_SURAT | UTTAR_PRADESH_LUCKNOW
+  industrialCluster String?   // Sanganer | Sitapura | Millennium Market | Ahmedabad Kalupur | Chowk
+
+  // ── Level 2 & 3: Fabric & Yarn Specifications ──
+  fabricType        String?   // Cotton | Rayon | Georgette | Modal Silk | Pakistani Lawn
+  fabricGrade       String?   // PURE_CAMBRIC_6060 | HEAVY_RAYON_14KG | PAKISTANI_LAWN_COTTON_80S | etc.
+  yarnSpecGsm       String?   // e.g. "80s x 80s / 90 GSM"
+
+  // ── Level 3: Quality Grading ──────────────
+  qualityGrade      String?   // GRADE_AAA | GRADE_AA | GRADE_A | GRADE_B
+
+  // ── Level 4: Design & Craftsmanship ───────
+  craftTypes        String?   // Comma-separated: "Schiffli Lace,Organza Dupatta,Digital Print"
+  patternCut        String?   // PAKISTANI_LONG_PANEL | CO_ORD_SET | SHORT_TUNIC | STRAIGHT_SET | ANARKALI_FLARED | ALIA_CUT | NYRA_CUT
+
+  // ── Product Physical Dimensions ───────────
+  topLengthInches   Int?      // e.g. 46 (Pakistani Long Panel) | 30 (Short Tunic) | 42 (Straight Set)
+  dupattalengthMeters Float?  // e.g. 2.25 | 2.5 | null (if no dupatta)
+
+  // ── B2B Pricing Structure ─────────────────
+  supplierSku       String?   @unique  // e.g. SKL-SRT-PAK80-PKP-0001
+  exFactoryPrice    Float?             // Raw cost from manufacturer (per set)
+  b2bSetPrice       Float?             // Wholesale selling price (per 4-piece set)
+  perPiecePrice     Float?             // Derived: b2bSetPrice / setPcs
+  msrpRetailPrice   Float?             // Suggested end-consumer price (per piece)
+  retailerMarginPct Float?             // Derived: ((msrp - perPiece) / perPiece) * 100
+  gstRatePercent    Int       @default(5)  // GST rate for garments (5%)
+  microCostingJson  String?            // JSON: { fabric, print, stitching, craft, packaging }
+
+  // ── B2B Set & Bundle Configuration ────────
+  setPcs            Int       @default(4)                    // 4 = M,L,XL,XXL | 6 = S,M,L,XL,XXL,3XL
+  setRatio          String    @default("M,L,XL,XXL")        // Comma-separated sizes in bundle
+  isPlusSize        Boolean   @default(false)                // True if bundle contains 3XL+
+  videoUrl          String?                                   // Product video URL (optional)
+
+  // ── Level 5: Smart Discovery & Taxonomy Tags ──
+  collectionTags    String?   // Comma-separated: "PAKISTANI_SUITS,CO_ORD_SETS,DAILYWEAR_BUDGET,PLUS_SIZE_SPECIAL"
+  isBestseller      Boolean   @default(false)
+  isNewArrival      Boolean   @default(true)
+  isHighMargin      Boolean   @default(false)
+
+  // ── Legacy Category Field ─────────────────
+  category          String    // Kurti Pant Set | Plazo Suit Set (preserve existing front-end filters)
+
+  variants          Variant[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
 }
 
+// ─────────────────────────────────────────────
+// VARIANT MODEL — Size & Color Inventory Control
+// ─────────────────────────────────────────────
 model Variant {
   id        String   @id @default(cuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  size      String   // XS, S, M, L, XL, XXL
-  color     String   // Emerald, Mustard Gold, Crimson, Indigo, Charcoal
-  stock     Int      @default(0) // Real-time strict inventory control
+  size      String   // M | L | XL | XXL | 3XL (for plus size bundles)
+  color     String   // Assorted | Emerald | Mustard Gold | Crimson
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
 
   @@unique([productId, size, color])
 }
 
+// ─────────────────────────────────────────────
+// ORDER MODEL — B2B GST + Logistics Engine
+// ─────────────────────────────────────────────
 model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  items           String      // JSON stringified snapshot array of ordered items, chosen sizes, and prices
-  totalAmount     Float
-  gstAmount       Float       // Automatic 5% GST computation
-  gstin           String?     // Optional customer B2B GSTIN input
-  companyName     String?     // Optional customer B2B Company Name
-  paymentStatus   String      // PENDING, PAID, FAILED
-  deliveryStatus  String      // PROCESSING, SHIPPED, DELIVERED
-  trackingId      String?     // 3PL Tracking ID (e.g. Shiprocket/Delhivery reference)
-  invoiceData     String?     // JSON snapshot containing HSN, CGST, SGST, IGST tax breakdown
-  phone           String?     // Shipping customer contact phone number
-  address         String?     // Shipping street address details
-  city            String?     // Shipping destination city
-  state           String?     // Shipping destination state (determines CGST/SGST vs IGST split)
-  pincode         String?     // Shipping destination pin code
-  createdAt       DateTime    @default(now())
+  id             String  @id @default(cuid())
+  userId         String
+  user           User    @relation(fields: [userId], references: [id])
+  items          String  // JSON snapshot array of ordered items with sizes and B2B prices
+  totalAmount    Float
+  gstAmount      Float   // 5% GST computed at checkout
+  gstin          String? // B2B GSTIN (optional)
+  companyName    String? // B2B company name (optional)
+  paymentStatus  String  // PENDING | PAID | FAILED
+  deliveryStatus String  // PROCESSING | SHIPPED | DELIVERED
+  trackingId     String? // 3PL Tracking ID (Shiprocket/Delhivery)
+  invoiceData    String? // JSON: HSN 6208, CGST, SGST, IGST tax breakdown
+  phone          String?
+  address        String?
+  city           String?
+  state          String? // Determines CGST/SGST vs IGST routing
+  pincode        String?
+  createdAt      DateTime @default(now())
 }
