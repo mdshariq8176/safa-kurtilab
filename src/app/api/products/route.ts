@@ -106,7 +106,14 @@ export async function GET(request: Request) {
       take: limit,
       skip,
       include: {
-        variants: true,
+        variants: {
+          select: {
+            id: true,
+            size: true,
+            color: true,
+            stock: true,
+          },
+        },
       },
     });
 
