@@ -31,9 +31,12 @@ const PATTERN_CUTS = [
 interface FilterSidebarProps {
   categories?: string[];
   sizes?: string[];
+  hubCounts?: Record<string, number>;
+  qualityGradeCounts?: Record<string, number>;
+  patternCutCounts?: Record<string, number>;
 }
 
-export default function FilterSidebar({}: FilterSidebarProps) {
+export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {}, patternCutCounts = {} }: FilterSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -117,66 +120,83 @@ export default function FilterSidebar({}: FilterSidebarProps) {
           <MapPin className="w-3.5 h-3.5 text-gold-dark" /> Sourcing Hub (Level 1)
         </h4>
         <div className="space-y-2">
-          {HUBS.map((hub) => (
-            <label key={hub.value} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
-              <input
-                type="radio"
-                name="hub-group"
-                checked={localHub === hub.value}
-                onChange={() => updateQuery('hub', localHub === hub.value ? null : hub.value)}
-                className="w-4 h-4 text-emerald-primary focus:ring-emerald-primary border-gold-primary/30"
-              />
-              <span className="group-hover:text-emerald-primary transition-colors text-[11px] font-medium leading-relaxed">
-                {hub.label}
-              </span>
+          {HUBS.filter((hub) => !Object.keys(hubCounts).length || (hubCounts[hub.value] ?? 0) > 0).map((hub) => (
+            <label key={hub.value} className="flex items-center justify-between gap-2.5 text-xs text-charcoal cursor-pointer group">
+              <div className="flex items-center gap-2.5">
+                <input
+                  type="radio"
+                  name="hub-group"
+                  checked={localHub === hub.value}
+                  onChange={() => updateQuery('hub', localHub === hub.value ? null : hub.value)}
+                  className="w-4 h-4 text-emerald-primary focus:ring-emerald-primary border-gold-primary/30"
+                />
+                <span className="group-hover:text-emerald-primary transition-colors text-[11px] font-medium leading-relaxed">
+                  {hub.label}
+                </span>
+              </div>
+              {hubCounts[hub.value] !== undefined && (
+                <span className="text-[9px] font-bold text-charcoal/40 bg-gold-primary/10 px-1.5 py-0.5 rounded-full">{hubCounts[hub.value]}</span>
+              )}
             </label>
           ))}
         </div>
       </div>
 
       {/* 🏆 Level 3: Quality Grade Pills */}
+      {Object.keys(qualityGradeCounts).length > 0 && (
       <div className="space-y-3">
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-gold-dark" /> Quality Grade (Level 3)
         </h4>
         <div className="space-y-2">
-          {QUALITY_GRADES.map((grade) => (
-            <label key={grade.value} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={localGrade === grade.value}
-                onChange={(e) => updateQuery('qualityGrade', e.target.checked ? grade.value : null)}
-                className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
-              />
-              <span className="group-hover:text-emerald-primary transition-colors text-[11px]">
-                {grade.label}
-              </span>
+          {QUALITY_GRADES.filter((grade) => (qualityGradeCounts[grade.value] ?? 0) > 0).map((grade) => (
+            <label key={grade.value} className="flex items-center justify-between gap-2.5 text-xs text-charcoal cursor-pointer group">
+              <div className="flex items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={localGrade === grade.value}
+                  onChange={(e) => updateQuery('qualityGrade', e.target.checked ? grade.value : null)}
+                  className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
+                />
+                <span className="group-hover:text-emerald-primary transition-colors text-[11px]">
+                  {grade.label}
+                </span>
+              </div>
+              <span className="text-[9px] font-bold text-charcoal/40 bg-gold-primary/10 px-1.5 py-0.5 rounded-full">{qualityGradeCounts[grade.value]}</span>
             </label>
           ))}
         </div>
       </div>
+      )}
 
       {/* ✂️ Level 4: Pattern Cut Variations */}
+      {(!Object.keys(patternCutCounts).length || PATTERN_CUTS.some(c => (patternCutCounts[c.value] ?? 0) > 0)) && (
       <div className="space-y-3">
         <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider flex items-center gap-1.5">
           <Tag className="w-3.5 h-3.5 text-gold-dark" /> Design Cut (Level 4)
         </h4>
         <div className="space-y-2">
-          {PATTERN_CUTS.map((cut) => (
-            <label key={cut.value} className="flex items-center gap-2.5 text-xs text-charcoal cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={localCut === cut.value}
-                onChange={(e) => updateQuery('patternCut', e.target.checked ? cut.value : null)}
-                className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
-              />
-              <span className="group-hover:text-emerald-primary transition-colors text-[11px]">
-                {cut.label}
-              </span>
+          {PATTERN_CUTS.filter((cut) => !Object.keys(patternCutCounts).length || (patternCutCounts[cut.value] ?? 0) > 0).map((cut) => (
+            <label key={cut.value} className="flex items-center justify-between gap-2.5 text-xs text-charcoal cursor-pointer group">
+              <div className="flex items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={localCut === cut.value}
+                  onChange={(e) => updateQuery('patternCut', e.target.checked ? cut.value : null)}
+                  className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
+                />
+                <span className="group-hover:text-emerald-primary transition-colors text-[11px]">
+                  {cut.label}
+                </span>
+              </div>
+              {patternCutCounts[cut.value] !== undefined && (
+                <span className="text-[9px] font-bold text-charcoal/40 bg-gold-primary/10 px-1.5 py-0.5 rounded-full">{patternCutCounts[cut.value]}</span>
+              )}
             </label>
           ))}
         </div>
       </div>
+      )}
 
       {/* 📦 B2B Set Ratio Info Box */}
       <div className="p-3 bg-amber-50/60 border border-gold-primary/30 rounded-lg text-charcoal space-y-1">

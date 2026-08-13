@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     const where: Prisma.ProductWhereInput = {};
 
     if (category) {
-      where.category = { contains: category };
+      where.category = category; // exact match
     }
 
     if (hub) {

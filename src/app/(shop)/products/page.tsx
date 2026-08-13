@@ -6,7 +6,6 @@ import SortDropdown from '@/components/shop/SortDropdown';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingBag, Sparkles, Search } from 'lucide-react';
-import { unstable_cache } from 'next/cache';
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -23,65 +22,9 @@ interface ProductsPageProps {
   }>;
 }
 
-export const revalidate = 60; // Enable Next.js ISR prefetching for instant page navigation
-
-// Cache filter categories and sizes for 1 hour to prevent redundant DB hits on every request
-const getCachedFilterOptions = unstable_cache(
-  async () => {
-    const [categoriesData, sizesData] = await Promise.all([
-      prisma.product.findMany({
-        select: { category: true },
-        distinct: ['category'],
-      }),
-      prisma.variant.findMany({
-        select: { size: true },
-        distinct: ['size'],
-      }),
-    ]);
-    return {
-      categories: categoriesData.map((c) => c.category).filter(Boolean),
-      sizes: sizesData.map((s) => s.size).filter(Boolean),
-    };
-  },
-  ['catalog-filter-options'],
-  { revalidate: 3600 }
-);
-
-// Top-level cached product query
-const fetchCachedProducts = unstable_cache(
-  async (serializedWhere: string, serializedOrderBy: string, skip: number, limit: number) => {
-    const where = JSON.parse(serializedWhere);
-    const orderBy = JSON.parse(serializedOrderBy);
-    return prisma.product.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-      include: {
-        variants: {
-          select: {
-            id: true,
-            size: true,
-            color: true,
-            stock: true,
-          },
-        },
-      },
-    });
-  },
-  ['catalog-products-list'],
-  { revalidate: 60 }
-);
-
-// Top-level cached count query
-const fetchCachedCount = unstable_cache(
-  async (serializedWhere: string) => {
-    const where = JSON.parse(serializedWhere);
-    return prisma.product.count({ where });
-  },
-  ['catalog-products-total'],
-  { revalidate: 60 }
-);
+// force-dynamic so searchParams (filters) are read fresh on every request.
+// DB queries themselves are fast (~30ms) so no performance regression.
+export const dynamic = 'force-dynamic';
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
@@ -184,18 +127,37 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     orderBy = { discount: 'desc' };
   }
 
-  const serializedWhere = JSON.stringify(where);
-  const serializedOrderBy = JSON.stringify(orderBy);
-
-  // Fetch results and cached filter options in parallel
-  const [products, totalCount, filterOptions] = await Promise.all([
-    fetchCachedProducts(serializedWhere, serializedOrderBy, skip, limit),
-    fetchCachedCount(serializedWhere),
-    getCachedFilterOptions(),
+  // Fetch results, count, and filter options in parallel directly (force-dynamic page)
+  const [products, totalCount, categoriesData, sizesData, qualityGradeCounts, hubCounts, patternCutCounts] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        variants: {
+          select: { id: true, size: true, color: true, stock: true },
+        },
+      },
+    }),
+    prisma.product.count({ where }),
+    prisma.product.findMany({ select: { category: true }, distinct: ['category'] }),
+    prisma.variant.findMany({ select: { size: true }, distinct: ['size'] }),
+    prisma.product.groupBy({ by: ['qualityGrade'], _count: { qualityGrade: true } }),
+    prisma.product.groupBy({ by: ['hubLocation'], _count: { hubLocation: true } }),
+    prisma.product.groupBy({ by: ['patternCut'], _count: { patternCut: true } }),
   ]);
 
-  const uniqueCategories = filterOptions.categories;
-  const uniqueSizes = filterOptions.sizes;
+  const uniqueCategories = categoriesData.map((c) => c.category).filter(Boolean) as string[];
+  const uniqueSizes = sizesData.map((s) => s.size).filter(Boolean) as string[];
+
+  // Build counts maps for filter sidebar (hide options with 0 products)
+  const qualityGradeMap: Record<string, number> = {};
+  qualityGradeCounts.forEach((g) => { if (g.qualityGrade) qualityGradeMap[g.qualityGrade] = g._count.qualityGrade; });
+  const hubMap: Record<string, number> = {};
+  hubCounts.forEach((h) => { if (h.hubLocation) hubMap[h.hubLocation] = h._count.hubLocation; });
+  const patternCutMap: Record<string, number> = {};
+  patternCutCounts.forEach((p) => { if (p.patternCut) patternCutMap[p.patternCut] = p._count.patternCut; });
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
@@ -275,7 +237,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {/* Main Grid: Sidebar + Products List */}
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}
-        <FilterSidebar categories={uniqueCategories} sizes={uniqueSizes} />
+        <FilterSidebar
+          categories={uniqueCategories}
+          sizes={uniqueSizes}
+          hubCounts={hubMap}
+          qualityGradeCounts={qualityGradeMap}
+          patternCutCounts={patternCutMap}
+        />
 
         {/* Products Grid */}
         <div className="flex-grow">
@@ -296,9 +264,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <div className="space-y-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {products.map((product) => {
-                  const b2bSetPrice = product.b2bSetPrice || product.basePrice;
-                  const perPiece = product.perPiecePrice || (b2bSetPrice / 4);
-                  const msrp = product.msrpRetailPrice || Math.round(perPiece * 2.2);
+                  const b2bSetPrice = product.b2bSetPrice ?? product.basePrice ?? 0;
+                  const perPiece = product.perPiecePrice ?? (b2bSetPrice / 4);
+                  const msrp = product.msrpRetailPrice ?? Math.round(perPiece * 2.2);
 
                   // Map Hub Location Labels dynamically
                   let hubLabel = 'Jaipur Hub';

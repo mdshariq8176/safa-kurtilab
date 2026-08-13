@@ -147,9 +147,11 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {products.map((product) => {
-              const discountAmt = product.basePrice * (product.discount / 100);
-              const salePrice = product.basePrice - discountAmt;
-              const hasDiscount = product.discount > 0;
+              const safeBasePrice = product.basePrice ?? 0;
+              const safeDiscount = product.discount ?? 0;
+              const discountAmt = safeBasePrice * (safeDiscount / 100);
+              const salePrice = safeBasePrice - discountAmt;
+              const hasDiscount = safeDiscount > 0;
 
               return (
                 <div key={product.id} className="group relative bg-alabaster rounded-xl border border-gold-primary/10 overflow-hidden hover:shadow-lg transition-all flex flex-col h-full">
@@ -193,7 +195,7 @@ export default async function HomePage() {
                     <div className="flex items-center justify-between mt-5 pt-3 border-t border-gold-primary/5">
                       <div className="flex flex-col">
                         {hasDiscount && (
-                          <span className="text-xs text-charcoal/40 line-through">₹{product.basePrice}</span>
+                          <span className="text-xs text-charcoal/40 line-through">₹{safeBasePrice.toLocaleString('en-IN')}</span>
                         )}
                         <span className="text-base font-bold text-emerald-primary">
                           ₹{salePrice.toLocaleString('en-IN')}

@@ -47,12 +47,14 @@ interface ProductDetailsClientProps {
 
   // Dynamic Volume Tier Discount calculation
   const volumeDiscountPct = setQuantity >= 21 ? 16 : setQuantity >= 6 ? 8 : 0;
-  const discountAmt = product.basePrice * (product.discount / 100);
-  const baseSalePrice = product.basePrice - discountAmt;
+  const safeBasePrice = product.basePrice ?? 0;
+  const safeDiscount = product.discount ?? 0;
+  const discountAmt = safeBasePrice * (safeDiscount / 100);
+  const baseSalePrice = safeBasePrice - discountAmt;
   const tierDiscountAmt = baseSalePrice * (volumeDiscountPct / 100);
   const finalSetPrice = baseSalePrice - tierDiscountAmt;
   const perPiecePrice = (finalSetPrice / 4).toFixed(0);
-  const hasDiscount = product.discount > 0 || volumeDiscountPct > 0;
+  const hasDiscount = safeDiscount > 0 || volumeDiscountPct > 0;
 
   // Retrieve current stock level for the selected variant
   const currentVariant = product.variants.find(
@@ -135,7 +137,7 @@ interface ProductDetailsClientProps {
                     ₹{finalSetPrice.toLocaleString('en-IN')}
                   </span>
                   {hasDiscount && (
-                    <span className="text-xs text-charcoal/40 line-through">₹{product.basePrice}</span>
+                    <span className="text-xs text-charcoal/40 line-through">₹{safeBasePrice.toLocaleString('en-IN')}</span>
                   )}
                   <span className="text-xs text-emerald-dark font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                     ≈ ₹{perPiecePrice}/piece
