@@ -23,8 +23,7 @@ interface ProductsPageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 30; // ISR fallback
+export const revalidate = 60; // Enable Next.js ISR prefetching for instant page navigation
 
 // Cache filter categories and sizes for 1 hour to prevent redundant DB hits on every request
 const getCachedFilterOptions = unstable_cache(
@@ -58,7 +57,16 @@ const fetchCachedProducts = unstable_cache(
       orderBy,
       skip,
       take: limit,
-      include: { variants: true },
+      include: {
+        variants: {
+          select: {
+            id: true,
+            size: true,
+            color: true,
+            stock: true,
+          },
+        },
+      },
     });
   },
   ['catalog-products-list'],
