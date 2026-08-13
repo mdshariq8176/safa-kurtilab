@@ -55,40 +55,26 @@ export default function FilterSidebar({}: FilterSidebarProps) {
     setLocalColor(searchParams.get('color'));
   }, [searchParams]);
 
-  // Debounced URL sync to prevent rapid network thrashing
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      
-      const updateParam = (key: string, val: string | null) => {
-        if (val) params.set(key, val); else params.delete(key);
-      };
-
-      updateParam('hub', localHub);
-      updateParam('qualityGrade', localGrade);
-      updateParam('patternCut', localCut);
-      updateParam('category', localCategory);
-      updateParam('size', localSize);
-      updateParam('color', localColor);
-
-      const targetUrl = `${pathname}?${params.toString()}`;
-      if (targetUrl !== `${pathname}?${searchParams.toString()}`) {
-        startTransition(() => {
-          router.replace(targetUrl, { scroll: false });
-        });
-      }
-    }, 250);
-
-    return () => clearTimeout(timer);
-  }, [localHub, localGrade, localCut, localCategory, localSize, localColor, pathname, router, searchParams]);
-
+  // Instant URL update without artificial debounce delays
   const updateQuery = (key: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    params.delete('page');
+
     if (key === 'hub') setLocalHub(value);
     if (key === 'qualityGrade') setLocalGrade(value);
     if (key === 'patternCut') setLocalCut(value);
     if (key === 'category') setLocalCategory(value);
     if (key === 'size') setLocalSize(value);
     if (key === 'color') setLocalColor(value);
+
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const clearAll = () => {
@@ -98,9 +84,12 @@ export default function FilterSidebar({}: FilterSidebarProps) {
     setLocalCategory(null);
     setLocalSize(null);
     setLocalColor(null);
+    startTransition(() => {
+      router.replace(pathname, { scroll: false });
+    });
   };
 
-  const hasFilters = localHub || localGrade || localCut || localCategory || localSize || localColor;
+  const hasFilters = Boolean(localHub || localGrade || localCut || localCategory || localSize || localColor);
 
   return (
     <aside className={`w-full md:w-72 flex-shrink-0 space-y-7 bg-white border border-gold-primary/20 rounded-xl p-6 shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-95' : ''}`}>
