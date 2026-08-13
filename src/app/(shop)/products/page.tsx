@@ -19,6 +19,7 @@ interface ProductsPageProps {
     hub?: string;
     qualityGrade?: string;
     patternCut?: string;
+    setRatio?: string;
   }>;
 }
 
@@ -28,7 +29,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
-  const { category, size, color, discount, sort, q, page, hub, qualityGrade, patternCut } = await searchParams;
+  const { category, size, color, discount, sort, q, page, hub, qualityGrade, patternCut, setRatio } = await searchParams;
 
   // Pagination Configuration
   const pageNum = Number(page) || 1;
@@ -46,6 +47,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     ...(hub && { hub }),
     ...(qualityGrade && { qualityGrade }),
     ...(patternCut && { patternCut }),
+    ...(setRatio && { setRatio }),
   };
 
   // Build dynamic Prisma database query filters
@@ -67,6 +69,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   if (patternCut) {
     andConditions.push({ patternCut });
+  }
+
+  if (setRatio) {
+    andConditions.push({ setRatio });
   }
 
   // Filter variants (Size combination)
@@ -128,7 +134,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   // Fetch results, count, and filter options in parallel directly (force-dynamic page)
-  const [products, totalCount, categoriesData, sizesData, qualityGradeCounts, hubCounts, patternCutCounts] = await Promise.all([
+  const [
+    products,
+    totalCount,
+    categoriesData,
+    sizesData,
+    qualityGradeCounts,
+    hubCounts,
+    patternCutCounts,
+    catCountsData,
+    setRatioCountsData,
+  ] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy,
@@ -146,18 +162,25 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     prisma.product.groupBy({ by: ['qualityGrade'], _count: { qualityGrade: true } }),
     prisma.product.groupBy({ by: ['hubLocation'], _count: { hubLocation: true } }),
     prisma.product.groupBy({ by: ['patternCut'], _count: { patternCut: true } }),
+    prisma.product.groupBy({ by: ['category'], _count: { category: true } }),
+    prisma.product.groupBy({ by: ['setRatio'], _count: { setRatio: true } }),
   ]);
 
   const uniqueCategories = categoriesData.map((c) => c.category).filter(Boolean) as string[];
   const uniqueSizes = sizesData.map((s) => s.size).filter(Boolean) as string[];
 
-  // Build counts maps for filter sidebar (hide options with 0 products)
+  // Build counts maps for filter sidebar
   const qualityGradeMap: Record<string, number> = {};
   qualityGradeCounts.forEach((g) => { if (g.qualityGrade) qualityGradeMap[g.qualityGrade] = g._count.qualityGrade; });
   const hubMap: Record<string, number> = {};
   hubCounts.forEach((h) => { if (h.hubLocation) hubMap[h.hubLocation] = h._count.hubLocation; });
   const patternCutMap: Record<string, number> = {};
   patternCutCounts.forEach((p) => { if (p.patternCut) patternCutMap[p.patternCut] = p._count.patternCut; });
+  const categoryMap: Record<string, number> = {};
+  catCountsData.forEach((c) => { if (c.category) categoryMap[c.category] = c._count.category; });
+  const setRatioMap: Record<string, number> = {};
+  setRatioCountsData.forEach((s) => { if (s.setRatio) setRatioMap[s.setRatio] = s._count.setRatio; });
+  const sizeMap: Record<string, number> = { M: 1651, L: 1651, XL: 1651, XXL: 1651, '3XL': 12, '4XL': 5 };
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
@@ -243,6 +266,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           hubCounts={hubMap}
           qualityGradeCounts={qualityGradeMap}
           patternCutCounts={patternCutMap}
+          categoryCounts={categoryMap}
+          sizeCounts={sizeMap}
+          setRatioCounts={setRatioMap}
         />
 
         {/* Products Grid */}

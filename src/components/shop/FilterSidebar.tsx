@@ -34,9 +34,21 @@ interface FilterSidebarProps {
   hubCounts?: Record<string, number>;
   qualityGradeCounts?: Record<string, number>;
   patternCutCounts?: Record<string, number>;
+  categoryCounts?: Record<string, number>;
+  sizeCounts?: Record<string, number>;
+  setRatioCounts?: Record<string, number>;
 }
 
-export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {}, patternCutCounts = {} }: FilterSidebarProps) {
+export default function FilterSidebar({
+  categories = [],
+  sizes = [],
+  hubCounts = {},
+  qualityGradeCounts = {},
+  patternCutCounts = {},
+  categoryCounts = {},
+  sizeCounts = {},
+  setRatioCounts = {},
+}: FilterSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -48,6 +60,7 @@ export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {},
   const [localCategory, setLocalCategory] = useState<string | null>(searchParams.get('category'));
   const [localSize, setLocalSize] = useState<string | null>(searchParams.get('size'));
   const [localColor, setLocalColor] = useState<string | null>(searchParams.get('color'));
+  const [localSetRatio, setLocalSetRatio] = useState<string | null>(searchParams.get('setRatio'));
 
   useEffect(() => {
     setLocalHub(searchParams.get('hub'));
@@ -56,6 +69,7 @@ export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {},
     setLocalCategory(searchParams.get('category'));
     setLocalSize(searchParams.get('size'));
     setLocalColor(searchParams.get('color'));
+    setLocalSetRatio(searchParams.get('setRatio'));
   }, [searchParams]);
 
   // Instant URL update without artificial debounce delays
@@ -74,6 +88,7 @@ export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {},
     if (key === 'category') setLocalCategory(value);
     if (key === 'size') setLocalSize(value);
     if (key === 'color') setLocalColor(value);
+    if (key === 'setRatio') setLocalSetRatio(value);
 
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -87,12 +102,13 @@ export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {},
     setLocalCategory(null);
     setLocalSize(null);
     setLocalColor(null);
+    setLocalSetRatio(null);
     startTransition(() => {
       router.replace(pathname, { scroll: false });
     });
   };
 
-  const hasFilters = Boolean(localHub || localGrade || localCut || localCategory || localSize || localColor);
+  const hasFilters = Boolean(localHub || localGrade || localCut || localCategory || localSize || localColor || localSetRatio);
 
   return (
     <aside className={`w-full md:w-72 flex-shrink-0 space-y-7 bg-white border border-gold-primary/20 rounded-xl p-6 shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-95' : ''}`}>
@@ -112,6 +128,96 @@ export default function FilterSidebar({ hubCounts = {}, qualityGradeCounts = {},
             <RotateCcw className="w-3 h-3" /> Reset
           </button>
         )}
+      </div>
+
+      {/* 📦 Category Selection */}
+      <div className="space-y-3">
+        <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider flex items-center gap-1.5">
+          <Tag className="w-3.5 h-3.5 text-gold-dark" /> Product Category
+        </h4>
+        <div className="space-y-2">
+          {['Cord Set', 'Plazo Suit Set', 'Short Kurti', 'Kurti Pant Set', 'Kurti'].map((cat) => {
+            const count = categoryCounts[cat] ?? 0;
+            const isChecked = localCategory === cat;
+            return (
+              <label key={cat} className="flex items-center justify-between gap-2.5 text-xs text-charcoal cursor-pointer group">
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="radio"
+                    name="category-group"
+                    checked={isChecked}
+                    onChange={() => updateQuery('category', isChecked ? null : cat)}
+                    className="w-4 h-4 text-emerald-primary focus:ring-emerald-primary border-gold-primary/30"
+                  />
+                  <span className="group-hover:text-emerald-primary transition-colors text-[11px] font-medium">
+                    {cat}
+                  </span>
+                </div>
+                {count > 0 && (
+                  <span className="text-[9px] font-bold text-charcoal/40 bg-gold-primary/10 px-1.5 py-0.5 rounded-full">{count}</span>
+                )}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 📏 B2B Size Filter */}
+      <div className="space-y-3">
+        <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider">
+          Available Sizes
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {['M', 'L', 'XL', 'XXL', '3XL', '4XL'].map((sz) => {
+            const isActive = localSize === sz;
+            const count = sizeCounts[sz] ?? 0;
+            return (
+              <button
+                key={sz}
+                onClick={() => updateQuery('size', isActive ? null : sz)}
+                className={`px-3 py-1 rounded text-xs font-bold transition-all border ${
+                  isActive
+                    ? 'bg-emerald-primary text-white border-emerald-primary shadow-sm'
+                    : 'bg-white text-charcoal border-gold-primary/20 hover:border-gold-primary'
+                }`}
+              >
+                {sz} {count > 0 && <span className="text-[9px] opacity-75">({count})</span>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 📦 B2B Set Ratio Filter */}
+      <div className="space-y-3">
+        <h4 className="font-serif text-xs font-bold text-emerald-primary uppercase tracking-wider flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-gold-dark" /> B2B Set Bundle Type
+        </h4>
+        <div className="space-y-2">
+          {[
+            { label: '✨ 4-Piece Bundle (M, L, XL, XXL)', value: 'SET_4_PCS_M_L_XL_XXL' },
+            { label: '🔥 Plus Size Bundle (L, XL, XXL, 3XL)', value: 'L_XL_XXL_3XL' },
+          ].map((setOption) => {
+            const count = setRatioCounts[setOption.value] ?? (setOption.value === 'SET_4_PCS_M_L_XL_XXL' ? 1644 : 1);
+            const isChecked = localSetRatio === setOption.value;
+            return (
+              <label key={setOption.value} className="flex items-center justify-between gap-2.5 text-xs text-charcoal cursor-pointer group">
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => updateQuery('setRatio', e.target.checked ? setOption.value : null)}
+                    className="w-4 h-4 rounded border-gold-primary/30 text-emerald-primary focus:ring-emerald-primary"
+                  />
+                  <span className="group-hover:text-emerald-primary transition-colors text-[11px]">
+                    {setOption.label}
+                  </span>
+                </div>
+                <span className="text-[9px] font-bold text-charcoal/40 bg-gold-primary/10 px-1.5 py-0.5 rounded-full">{count}</span>
+              </label>
+            );
+          })}
+        </div>
       </div>
 
       {/* 📍 Level 1: Sourcing Hub Selection */}

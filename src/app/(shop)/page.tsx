@@ -83,11 +83,26 @@ export default async function HomePage() {
           <div className="w-12 h-0.5 bg-gold-primary mx-auto mt-2" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Kurti Pant Set */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Indo-Western Cord Sets */}
+          <Link href="/products?category=Cord Set" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+            <Image
+              src="/images/emerald-georgette-kurta.png"
+              alt="Indo-Western Cord Sets"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10">
+              <h3 className="font-serif text-2xl font-semibold tracking-wide">Indo-Western Cord Sets</h3>
+              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">141 Trending B2B Designs</p>
+            </div>
+          </Link>
+
+          {/* Kurti Pant Sets */}
           <Link href="/products?category=Kurti Pant Set" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
             <Image
-              src="/images/IMG-20260706-WA0003.jpg"
+              src="/images/indigo-cotton-kurta.png"
               alt="Kurti Pant Sets"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -102,7 +117,7 @@ export default async function HomePage() {
           {/* Plazo Suit Set */}
           <Link href="/products?category=Plazo Suit Set" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
             <Image
-              src="/images/IMG-20260706-WA0001.jpg"
+              src="/images/mustard-anarkali.png"
               alt="Plazo Suit Sets"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -117,7 +132,7 @@ export default async function HomePage() {
           {/* All designs */}
           <Link href="/products" className="group block relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
             <Image
-              src="/images/IMG-20260706-WA0002.jpg"
+              src="/images/ruby-red-straight.png"
               alt="Explore All"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -125,7 +140,7 @@ export default async function HomePage() {
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10">
               <h3 className="font-serif text-2xl font-semibold tracking-wide">Explore All</h3>
-              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Browse Full Luxury Catalog</p>
+              <p className="text-xs text-white/80 mt-1 uppercase tracking-widest">Browse 1,650+ Luxury Designs</p>
             </div>
           </Link>
         </div>
