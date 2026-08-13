@@ -30,9 +30,7 @@ export default function SortDropdown({ initialSort }: SortDropdownProps) {
           } else {
             params.set('sort', val);
           }
-          startTransition(() => {
-            router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-          });
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
         }}
       >
         <option value="newest">Newest Arrivals</option>

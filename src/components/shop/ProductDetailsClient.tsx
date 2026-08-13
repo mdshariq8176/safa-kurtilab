@@ -80,10 +80,7 @@ interface ProductDetailsClientProps {
     });
 
     setIsAddedSuccessfully(true);
-    setTimeout(() => setIsAddedSuccessfully(false), 2500);
-
-    const cartButton = document.querySelector('button[class*="bg-emerald-primary"]') as HTMLButtonElement;
-    if (cartButton) cartButton.click();
+    setTimeout(() => setIsAddedSuccessfully(false), 2000);
   };
 
   const SET_RATIOS = [
@@ -151,24 +148,51 @@ interface ProductDetailsClientProps {
               )}
             </div>
 
-            {/* B2B Volume Slab Pricing Table */}
+            {/* B2B Volume Slab Pricing Table - Interactive Buttons */}
             <div className="space-y-1.5">
-              <span className="text-[10px] text-gold-dark font-extrabold uppercase tracking-widest block">
-                💎 B2B Volume Slab Savings Matrix
+              <span className="text-[10px] text-gold-dark font-extrabold uppercase tracking-widest block flex items-center justify-between">
+                <span>💎 B2B Volume Slab Savings Matrix</span>
+                <span className="text-[9px] text-emerald-primary font-normal">Click slab to apply discount</span>
               </span>
               <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                <div className={`p-2 rounded border transition-all ${setQuantity <= 5 ? 'border-emerald-primary bg-emerald-50/50 font-bold text-emerald-primary' : 'border-gray-200 text-charcoal/70'}`}>
+                <button
+                  type="button"
+                  onClick={() => setSetQuantity(1)}
+                  className={`p-2.5 rounded-lg border transition-all cursor-pointer ${
+                    setQuantity <= 5
+                      ? 'border-emerald-primary bg-emerald-50 text-emerald-primary font-bold shadow-sm scale-[1.02]'
+                      : 'border-gray-200 text-charcoal/70 bg-white hover:border-gold-primary'
+                  }`}
+                >
                   <div className="font-bold">1 – 5 Sets</div>
                   <div className="text-[10px] text-charcoal/60">Standard Rate</div>
-                </div>
-                <div className={`p-2 rounded border transition-all ${setQuantity >= 6 && setQuantity <= 20 ? 'border-emerald-primary bg-emerald-50/50 font-bold text-emerald-primary' : 'border-gray-200 text-charcoal/70'}`}>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSetQuantity(6)}
+                  className={`p-2.5 rounded-lg border transition-all cursor-pointer ${
+                    setQuantity >= 6 && setQuantity <= 20
+                      ? 'border-emerald-primary bg-emerald-50 text-emerald-primary font-bold shadow-sm scale-[1.02]'
+                      : 'border-gray-200 text-charcoal/70 bg-white hover:border-gold-primary'
+                  }`}
+                >
                   <div className="font-bold">6 – 20 Sets</div>
                   <div className="text-[10px] text-emerald-dark font-bold">8% OFF</div>
-                </div>
-                <div className={`p-2 rounded border transition-all ${setQuantity >= 21 ? 'border-emerald-primary bg-emerald-50/50 font-bold text-emerald-primary' : 'border-gray-200 text-charcoal/70'}`}>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSetQuantity(21)}
+                  className={`p-2.5 rounded-lg border transition-all cursor-pointer ${
+                    setQuantity >= 21
+                      ? 'border-emerald-primary bg-emerald-50 text-emerald-primary font-bold shadow-sm scale-[1.02]'
+                      : 'border-gray-200 text-charcoal/70 bg-white hover:border-gold-primary'
+                  }`}
+                >
                   <div className="font-bold">21+ Sets</div>
                   <div className="text-[10px] text-emerald-dark font-bold">16% OFF</div>
-                </div>
+                </button>
               </div>
             </div>
           </div>

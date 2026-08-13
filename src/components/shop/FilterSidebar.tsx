@@ -90,9 +90,7 @@ export default function FilterSidebar({
     if (key === 'color') setLocalColor(value);
     if (key === 'setRatio') setLocalSetRatio(value);
 
-    startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const clearAll = () => {
@@ -103,9 +101,7 @@ export default function FilterSidebar({
     setLocalSize(null);
     setLocalColor(null);
     setLocalSetRatio(null);
-    startTransition(() => {
-      router.replace(pathname, { scroll: false });
-    });
+    router.replace(pathname, { scroll: false });
   };
 
   const hasFilters = Boolean(localHub || localGrade || localCut || localCategory || localSize || localColor || localSetRatio);
