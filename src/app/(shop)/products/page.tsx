@@ -23,9 +23,8 @@ interface ProductsPageProps {
   }>;
 }
 
-// force-dynamic so searchParams (filters) are read fresh on every request.
-// DB queries themselves are fast (~30ms) so no performance regression.
-export const dynamic = 'force-dynamic';
+// Enable Next.js ISR edge caching so Vercel CDN nodes serve instant page responses (<50ms)
+export const revalidate = 3600;
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   // Resolve promise params
@@ -237,6 +236,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             return (
               <Link
                 key={h.code}
+                prefetch={true}
                 href={{
                   pathname: '/products',
                   query: { ...resolvedParams, hub: h.code || undefined, page: undefined },
@@ -386,6 +386,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 <div className="flex justify-center items-center gap-6 pt-8 border-t border-gold-primary/10">
                   {/* Previous Button */}
                   <Link
+                    prefetch={true}
                     href={{
                       pathname: '/products',
                       query: { ...resolvedParams, page: String(pageNum - 1) },
@@ -406,6 +407,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
                   {/* Next Button */}
                   <Link
+                    prefetch={true}
                     href={{
                       pathname: '/products',
                       query: { ...resolvedParams, page: String(pageNum + 1) },

@@ -61,7 +61,7 @@ export default function Navbar() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wider uppercase text-charcoal/80">
-            <Link href="/" className="hover:text-emerald-primary transition-colors">
+            <Link prefetch={true} href="/" className="hover:text-emerald-primary transition-colors">
               Home
             </Link>
             
@@ -90,17 +90,17 @@ export default function Navbar() {
                       </h4>
                       <ul className="space-y-2 text-xs text-charcoal/70">
                         <li>
-                          <Link href="/products?category=Kurti Pant Set" className="hover:text-gold-dark transition-colors block py-0.5">
+                          <Link prefetch={true} href="/products?category=Kurti Pant Set" className="hover:text-gold-dark transition-colors block py-0.5">
                             Kurti Pant Sets (Premium Cotton)
                           </Link>
                         </li>
                         <li>
-                          <Link href="/products?category=Plazo Suit Set" className="hover:text-gold-dark transition-colors block py-0.5">
+                          <Link prefetch={true} href="/products?category=Plazo Suit Set" className="hover:text-gold-dark transition-colors block py-0.5">
                             Plazo Suit Sets (Festive Wear)
                           </Link>
                         </li>
                         <li>
-                          <Link href="/products" className="hover:text-gold-dark transition-colors block py-0.5 font-semibold text-emerald-primary mt-1">
+                          <Link prefetch={true} href="/products" className="hover:text-gold-dark transition-colors block py-0.5 font-semibold text-emerald-primary mt-1">
                             Browse All Styles &rarr;
                           </Link>
                         </li>
@@ -133,10 +133,10 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            <Link href="/products" className="hover:text-emerald-primary transition-colors">
+            <Link prefetch={true} href="/products" className="hover:text-emerald-primary transition-colors">
               Store
             </Link>
-            <Link href="/admin" className="hover:text-emerald-primary transition-colors flex items-center gap-1 text-gold-dark font-semibold">
+            <Link prefetch={true} href="/admin" className="hover:text-emerald-primary transition-colors flex items-center gap-1 text-gold-dark font-semibold">
               <ShieldCheck className="w-4 h-4" /> Admin Center
             </Link>
           </nav>
