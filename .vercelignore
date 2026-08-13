@@ -1,0 +1,17 @@
+.next
+node_modules
+.chrome_profile
+.chrome_profile_indiamart
+raw-images
+raw_drive_images
+public/images/processed
+scratch
+SKU
+price_watcher.log
+*.npz
+*.csv
+*.joblib
+*.keras
+*.zip
+*.xlsx
+scripts/*.png

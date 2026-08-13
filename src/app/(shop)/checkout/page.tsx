@@ -31,7 +31,7 @@ export default function CheckoutPage() {
   });
 
   // UI state
-  const [gstinError, setGwinError] = useState(''); // Typo from original was resolved
+  const [gstinError, setGstInError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'form' | 'modal' | 'success'>('form');
   const [createdOrderId, setCreatedOrderId] = useState('');
@@ -51,11 +51,11 @@ export default function CheckoutPage() {
         next.gstin = uppercaseVal;
 
         if (!value) {
-          setGwinError('');
+          setGstInError('');
         } else if (!GSTIN_REGEX.test(uppercaseVal)) {
-          setGwinError('Invalid GSTIN structure. Must match: 07AAAAA1111A1Z1');
+          setGstInError('Invalid GSTIN structure. Must match: 07AAAAA1111A1Z1');
         } else {
-          setGwinError('');
+          setGstInError('');
         }
       }
 
@@ -67,7 +67,7 @@ export default function CheckoutPage() {
     const baseFields = formData.name && formData.email && formData.phone && formData.address && formData.city && formData.state && formData.pincode;
     if (!baseFields) return false;
     if (formData.isB2B) {
-      return formData.companyName && formData.gstin && !gstinError; // Note: gstinError still mapped internally, let's make sure it is handled. Let's keep gstinError name or map it. Wait, let's keep gstinError mapping to prevent code mismatches!
+      return formData.companyName && formData.gstin && !gstinError;
     }
     return true;
   };
@@ -97,11 +97,13 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items: items.map((item) => ({
             id: item.productId,
+            productId: item.productId,
             title: item.title,
             price: item.price - item.price * (item.discount / 100),
             quantity: item.quantity,
             size: item.size,
             color: item.color,
+            setRatio: item.setRatio,
           })),
           totalAmount: grandTotal,
           gstAmount: gstAmount,

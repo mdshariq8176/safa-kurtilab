@@ -70,7 +70,7 @@ interface ProductDetailsClientProps {
       title: product.title,
       price: product.basePrice,
       discount: product.discount,
-      image: product.images,
+      image: product.images.split(/;|,|\s+/)[0]?.trim() || product.images,
       size: selectedSize,
       color: selectedColor,
       quantity: setQuantity,
@@ -98,7 +98,7 @@ interface ProductDetailsClientProps {
         <div className="md:col-span-6">
           <div className="relative aspect-[3/4] w-full rounded-2xl border border-gold-primary/10 overflow-hidden bg-alabaster shadow-sm">
             <Image
-              src={product.images}
+              src={product.images.split(/;|,|\s+/)[0]?.trim() || '/images/placeholder.jpg'}
               alt={product.title}
               fill
               className="object-cover"

@@ -58,7 +58,7 @@ export default function CartPage() {
             >
               <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-alabaster">
                 <Image
-                  src={item.image || '/images/logo.jpg'}
+                  src={item.image ? (item.image.split(/;|,|\s+/)[0]?.trim() || item.image) : '/images/logo.jpg'}
                   alt={item.title}
                   fill
                   className="object-cover"

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { AlertCircle, ArrowLeft, TrendingUp, ShoppingBag, Users, AlertTriangle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, TrendingUp, ShoppingBag, Users, AlertTriangle, Upload } from 'lucide-react';
 import Link from 'next/link';
 
 interface Order {
@@ -113,6 +113,12 @@ export default function AdminDashboardClient({ orders, products, usersCount }: A
           >
             B2B Orders
           </button>
+          <Link
+            href="/admin/import"
+            className="px-4 py-2 bg-gold-dark hover:bg-gold-primary text-white rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
+          >
+            <Upload className="w-3.5 h-3.5" /> AI Ingestion
+          </Link>
         </div>
       </div>
 

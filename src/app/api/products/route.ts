@@ -45,6 +45,14 @@ export async function GET(request: Request) {
       where.qualityGrade = { in: grades };
     }
 
+    if (craftTypes) {
+      where.craftTypes = { contains: craftTypes };
+    }
+
+    if (minMargin) {
+      where.retailerMarginPct = { gte: parseFloat(minMargin) };
+    }
+
     if (patternCuts) {
       const cuts = patternCuts.split(',').map((c) => c.trim());
       where.patternCut = { in: cuts };
@@ -71,12 +79,12 @@ export async function GET(request: Request) {
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { category: { contains: search, mode: 'insensitive' } },
-        { fabricType: { contains: search, mode: 'insensitive' } },
-        { craftTypes: { contains: search, mode: 'insensitive' } },
-        { patternCut: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search } },
+        { description: { contains: search } },
+        { category: { contains: search } },
+        { fabricType: { contains: search } },
+        { craftTypes: { contains: search } },
+        { patternCut: { contains: search } },
       ];
     }
 

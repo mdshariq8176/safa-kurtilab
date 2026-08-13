@@ -47,10 +47,11 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. Deduct variant stock in strict real-time
     for (const item of items) {
+      const targetProductId = item.productId || item.id;
+      if (!targetProductId) continue;
       const dbProduct = await prisma.product.findUnique({
-        where: { id: item.productId },
+        where: { id: targetProductId },
         include: { variants: true },
       });
 

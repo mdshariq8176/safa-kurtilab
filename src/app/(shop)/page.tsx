@@ -165,7 +165,7 @@ export default async function HomePage() {
                     </button>
                     <Link href={`/products/${product.slug}`}>
                       <Image
-                        src={product.images}
+                        src={product.images.split(/;|,|\s+/)[0]?.trim() || '/images/placeholder.jpg'}
                         alt={product.title}
                         fill
                         className="object-cover group-hover:scale-102 transition-transform duration-500 cursor-pointer"
