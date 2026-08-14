@@ -9,6 +9,13 @@ import os
 import time
 import json
 
+import os
+import time
+import json
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -42,15 +49,26 @@ SAFETY_SETTINGS = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 
+_CACHED_WORKING_MODEL_NAME = None
+
 class GeminiVisionClient:
     def __init__(self, api_key: str = None, model_name: str = MODEL_NAME):
+        global _CACHED_WORKING_MODEL_NAME
         self.api_key = api_key or GEMINI_API_KEY
         if self.api_key:
             genai.configure(api_key=self.api_key)
             os.environ["GOOGLE_API_KEY"] = self.api_key
-        
-        # Auto-fallback sequence for available Gemini Flash models
-        candidate_models = [model_name, "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"]
+
+        if _CACHED_WORKING_MODEL_NAME:
+            self.model_name = _CACHED_WORKING_MODEL_NAME
+            self.model = genai.GenerativeModel(
+                model_name=self.model_name,
+                generation_config=GENERATION_CONFIG,
+                safety_settings=SAFETY_SETTINGS
+            )
+            return
+
+        candidate_models = ["gemini-flash-lite-latest", model_name, "gemini-flash-latest", "gemini-1.5-flash"]
         self.model = None
         self.model_name = candidate_models[0]
 
@@ -61,20 +79,17 @@ class GeminiVisionClient:
                     generation_config=GENERATION_CONFIG,
                     safety_settings=SAFETY_SETTINGS
                 )
-                # Test generate content to ensure model works
-                res = m.generate_content("Ping")
-                if res and res.text:
-                    self.model = m
-                    self.model_name = m_name
-                    print(f"🟢 Active Gemini Model Selected: {m_name}")
-                    break
-            except Exception as ex:
+                self.model = m
+                self.model_name = m_name
+                _CACHED_WORKING_MODEL_NAME = m_name
+                break
+            except Exception:
                 continue
 
         if self.model is None:
-            # Fallback to base constructor if ping failed
+            self.model_name = "gemini-flash-latest"
             self.model = genai.GenerativeModel(
-                model_name="gemini-flash-latest",
+                model_name=self.model_name,
                 generation_config=GENERATION_CONFIG,
                 safety_settings=SAFETY_SETTINGS
             )
